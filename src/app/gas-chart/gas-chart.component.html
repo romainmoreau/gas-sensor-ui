@@ -1,0 +1,15 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>{{gasSensingUpdatesRange.description}} ({{gasSensingUpdatesRange.unit}})</mat-card-title>
+    <mat-card-subtitle>{{gasSensingUpdatesRange.sensorName}}</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <highcharts-chart [Highcharts]="Highcharts" [options]="chartOptions" [(update)]="updateChart"></highcharts-chart>
+  </mat-card-content>
+  <mat-card-actions>
+    <div fxLayout="row wrap" *ngFor="let unit of units">
+      <button mat-button [color]="unitName === unit.name && unitValue === value ? 'accent' : ''"
+        *ngFor="let value of unit.values" (click)="changeUnit(unit.name,value)">{{value}}{{unit.name}}</button>
+    </div>
+  </mat-card-actions>
+</mat-card>
