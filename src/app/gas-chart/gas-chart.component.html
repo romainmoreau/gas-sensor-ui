@@ -1,6 +1,9 @@
 <mat-card>
   <mat-card-header>
-    <mat-card-title>{{gasSensingUpdatesRange.description}} ({{gasSensingUpdatesRange.unit}})</mat-card-title>
+    <mat-card-title fxLayout="row">
+      <div>{{gasSensingUpdatesRange.description}} ({{gasSensingUpdatesRange.unit}})</div>
+      <mat-spinner [fxShow]="isUpdating()" diameter="24"></mat-spinner>
+    </mat-card-title>
     <mat-card-subtitle>{{gasSensingUpdatesRange.sensorName}}</mat-card-subtitle>
   </mat-card-header>
   <mat-card-content>

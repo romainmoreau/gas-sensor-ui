@@ -4,7 +4,7 @@ import { GasSensingUpdatesRange } from '../gas-sensing-updates-range';
 import { GasSensingUpdateService } from '../gas-sensing-update.service';
 import { Unit, UnitName } from '../unit';
 import * as moment from 'moment';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-gas-chart',
@@ -34,6 +34,7 @@ export class GasChartComponent implements OnChanges {
     ]
   };
   updateChart: boolean;
+  updateSubscription: Subscription;
 
   @Input()
   gasSensingUpdatesRange: GasSensingUpdatesRange;
@@ -60,8 +61,15 @@ export class GasChartComponent implements OnChanges {
     this.updateData();
   }
 
+  private isUpdating(): boolean {
+    return this.updateSubscription && !this.updateSubscription.closed;
+  }
+
   private updateData(): void {
-    forkJoin(this.gasSensingUpdateService.getIntervals(this.gasSensingUpdatesRange),
+    if (this.isUpdating()) {
+      this.updateSubscription.unsubscribe();
+    }
+    this.updateSubscription = forkJoin(this.gasSensingUpdateService.getIntervals(this.gasSensingUpdatesRange),
       this.gasSensingUpdateService.getUpdates(this.gasSensingUpdatesRange, this.unitName, this.unitValue))
       .subscribe(([gasSensingIntervals, gasSensingUpdates]) => {
         const data = gasSensingUpdates.map(gasSensingUpdate => [
