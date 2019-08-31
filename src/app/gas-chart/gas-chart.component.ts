@@ -61,7 +61,7 @@ export class GasChartComponent implements OnChanges {
     this.updateData();
   }
 
-  private isUpdating(): boolean {
+  isUpdating(): boolean {
     return this.updateSubscription && !this.updateSubscription.closed;
   }
 
@@ -69,30 +69,31 @@ export class GasChartComponent implements OnChanges {
     if (this.isUpdating()) {
       this.updateSubscription.unsubscribe();
     }
-    this.updateSubscription = forkJoin(this.gasSensingUpdateService.getIntervals(this.gasSensingUpdatesRange),
-      this.gasSensingUpdateService.getUpdates(this.gasSensingUpdatesRange, this.unitName, this.unitValue))
-      .subscribe(([gasSensingIntervals, gasSensingUpdates]) => {
-        const data = gasSensingUpdates.map(gasSensingUpdate => [
-          moment(gasSensingUpdate.localDateTime, moment.HTML5_FMT.DATETIME_LOCAL_MS).valueOf(),
-          gasSensingUpdate.value
-        ] as [number, number]);
-        if (gasSensingIntervals.length === 0) {
-          (this.chartOptions.series[0] as Highcharts.SeriesScatterOptions).data = data;
-        } else {
-          gasSensingIntervals.forEach(gasSensingInterval => {
-            const filteredData = data.filter(d => (gasSensingInterval.minValue === null || gasSensingInterval.minValue >= d[1])
-              && (gasSensingInterval.maxValue === null || gasSensingInterval.maxValue < d[1]));
-            if (gasSensingInterval.category === 'FINE') {
-              (this.chartOptions.series[1] as Highcharts.SeriesScatterOptions).data = filteredData;
-            } else if (gasSensingInterval.category === 'WARNING') {
-              (this.chartOptions.series[2] as Highcharts.SeriesScatterOptions).data = filteredData;
-            } else if (gasSensingInterval.category === 'SEVERE') {
-              (this.chartOptions.series[3] as Highcharts.SeriesScatterOptions).data = filteredData;
-            }
-          });
-        }
-        this.updateChart = true;
-      });
+    this.updateSubscription = forkJoin([
+      this.gasSensingUpdateService.getIntervals(this.gasSensingUpdatesRange),
+      this.gasSensingUpdateService.getUpdates(this.gasSensingUpdatesRange, this.unitName, this.unitValue)
+    ]).subscribe(([gasSensingIntervals, gasSensingUpdates]) => {
+      const data = gasSensingUpdates.map(gasSensingUpdate => [
+        moment(gasSensingUpdate.localDateTime, moment.HTML5_FMT.DATETIME_LOCAL_MS).valueOf(),
+        gasSensingUpdate.value
+      ] as [number, number]);
+      if (gasSensingIntervals.length === 0) {
+        (this.chartOptions.series[0] as Highcharts.SeriesScatterOptions).data = data;
+      } else {
+        gasSensingIntervals.forEach(gasSensingInterval => {
+          const filteredData = data.filter(d => (gasSensingInterval.minValue === null || gasSensingInterval.minValue >= d[1])
+            && (gasSensingInterval.maxValue === null || gasSensingInterval.maxValue < d[1]));
+          if (gasSensingInterval.category === 'FINE') {
+            (this.chartOptions.series[1] as Highcharts.SeriesScatterOptions).data = filteredData;
+          } else if (gasSensingInterval.category === 'WARNING') {
+            (this.chartOptions.series[2] as Highcharts.SeriesScatterOptions).data = filteredData;
+          } else if (gasSensingInterval.category === 'SEVERE') {
+            (this.chartOptions.series[3] as Highcharts.SeriesScatterOptions).data = filteredData;
+          }
+        });
+      }
+      this.updateChart = true;
+    });
   }
 
   private createSeries(name: string, color: string): Highcharts.SeriesScatterOptions {
