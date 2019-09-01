@@ -30,10 +30,10 @@ export class GasChartComponent implements OnChanges {
       useUTC: false
     },
     series: [
-      this.createSeries('GENERIC', '#0074D9'),
-      this.createSeries('FINE', '#2ECC40'),
-      this.createSeries('WARNING', '#FF851B'),
-      this.createSeries('SEVERE', '#FF4136')
+      this.createSeriesOptions('GENERIC', '#0074D9'),
+      this.createSeriesOptions('FINE', '#2ECC40'),
+      this.createSeriesOptions('WARNING', '#FF851B'),
+      this.createSeriesOptions('SEVERE', '#FF4136')
     ]
   };
   updateChart: boolean;
@@ -47,6 +47,9 @@ export class GasChartComponent implements OnChanges {
   units: Unit[];
   unitName: UnitName = 'm';
   unitValue = 15;
+
+  chart: Highcharts.Chart;
+  chartCallback: Highcharts.ChartCallbackFunction = (chart: Highcharts.Chart) => this.chart = chart;
 
   constructor(private gasSensingUpdateService: GasSensingUpdateService, private rxStompService: RxStompService) {
     this.units = [
@@ -110,19 +113,25 @@ export class GasChartComponent implements OnChanges {
         }
       });
     }
-    this.updateChart = true;
-  }
-
-  private addData(data: [number, number][], series: Highcharts.SeriesScatterOptions, append: boolean) {
     if (append) {
-      data.forEach(d => series.data.push(d));
+      this.chart.redraw();
     } else {
-      series.data = data;
+      this.updateChart = true;
     }
   }
 
-  private createSeries(name: string, color: string): Highcharts.SeriesScatterOptions {
+  private addData(data: [number, number][], seriesOptions: Highcharts.SeriesScatterOptions, append: boolean) {
+    if (append) {
+      const series = this.chart.get(seriesOptions.id) as Highcharts.Series;
+      data.forEach(d => series.addPoint(d, false));
+    } else {
+      seriesOptions.data = data;
+    }
+  }
+
+  private createSeriesOptions(name: string, color: string): Highcharts.SeriesScatterOptions {
     return {
+      id: name,
       name,
       color,
       type: 'scatter',
