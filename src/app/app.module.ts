@@ -10,6 +10,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AppComponent } from './app.component';
 import { GasChartComponent } from './gas-chart/gas-chart.component';
 import { HighchartsChartModule } from 'highcharts-angular';
+import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
+import { gasSensingRxStompConfig } from './gas-sensing-rx-stomp.config';
 
 @NgModule({
   declarations: [
@@ -26,7 +28,17 @@ import { HighchartsChartModule } from 'highcharts-angular';
     HighchartsChartModule,
     MatProgressSpinnerModule
   ],
-  providers: [],
+  providers: [
+    {
+      provide: InjectableRxStompConfig,
+      useValue: gasSensingRxStompConfig
+    },
+    {
+      provide: RxStompService,
+      useFactory: rxStompServiceFactory,
+      deps: [InjectableRxStompConfig]
+    }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

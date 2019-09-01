@@ -10,7 +10,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { HttpRequest } from '@angular/common/http';
 import { GasSensingUpdatesRange } from '../gas-sensing-updates-range';
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, Injectable } from '@angular/core';
+import { RxStompService } from '@stomp/ng2-stompjs';
+import { Observable, EMPTY } from 'rxjs';
+import { IMessage } from '@stomp/stompjs';
 
 @Component({
   template: `<app-gas-chart [gasSensingUpdatesRange]="gasSensingUpdatesRange"></app-gas-chart>`
@@ -20,6 +23,13 @@ class GasChartHostComponent {
   gasChartComponent: GasChartComponent;
 
   gasSensingUpdatesRange: GasSensingUpdatesRange;
+}
+
+@Injectable()
+export class TestRxStompService {
+  watch(): Observable<IMessage> {
+    return EMPTY;
+  }
 }
 
 describe('GasChartComponent', () => {
@@ -41,6 +51,12 @@ describe('GasChartComponent', () => {
         MatCardModule,
         HighchartsChartModule,
         MatProgressSpinnerModule
+      ],
+      providers: [
+        {
+          provide: RxStompService,
+          useClass: TestRxStompService
+        }
       ]
     }).compileComponents();
   }));
