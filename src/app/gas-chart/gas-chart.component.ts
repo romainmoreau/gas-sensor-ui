@@ -139,9 +139,6 @@ export class GasChartComponent implements OnChanges {
         pointFormatter() {
           return `${moment(this.x).format()}<br/>Value: ${this.y}`;
         }
-      },
-      marker: {
-        radius: 1
       }
     };
   }
