@@ -14,6 +14,7 @@ import { Component, ViewChild, Injectable } from '@angular/core';
 import { RxStompService } from '@stomp/ng2-stompjs';
 import { Observable, EMPTY } from 'rxjs';
 import { IMessage } from '@stomp/stompjs';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   template: `<app-gas-chart [gasSensingUpdatesRange]="gasSensingUpdatesRange"></app-gas-chart>`
@@ -50,7 +51,8 @@ describe('GasChartComponent', () => {
         MatButtonModule,
         MatCardModule,
         HighchartsChartModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        MatIconModule
       ],
       providers: [
         {

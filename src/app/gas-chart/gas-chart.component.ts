@@ -48,6 +48,8 @@ export class GasChartComponent implements OnChanges {
   unitName: UnitName = 'm';
   unitValue = 15;
 
+  expanded: boolean;
+
   chart: Highcharts.Chart;
   chartCallback: Highcharts.ChartCallbackFunction = (chart: Highcharts.Chart) => this.chart = chart;
 
@@ -141,5 +143,10 @@ export class GasChartComponent implements OnChanges {
         }
       }
     };
+  }
+
+  toggleExpanded(): void {
+    this.expanded = !this.expanded;
+    setTimeout(() => this.chart.reflow());
   }
 }

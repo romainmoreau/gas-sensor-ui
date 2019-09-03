@@ -1,13 +1,19 @@
 <mat-card>
-  <mat-card-header>
-    <mat-card-title fxLayout="row">
+  <mat-card-header fxLayout="row">
+    <mat-card-title>
       <div>{{gasSensingUpdatesRange.description}} ({{gasSensingUpdatesRange.unit}})</div>
-      <mat-spinner [fxShow]="isUpdating()" diameter="24"></mat-spinner>
     </mat-card-title>
     <mat-card-subtitle>{{gasSensingUpdatesRange.sensorName}}</mat-card-subtitle>
+    <div fxFlex fxLayout="row" fxLayoutAlign="end" fxLayoutGap="8px">
+      <mat-spinner [fxShow]="isUpdating()" diameter="24"></mat-spinner>
+      <button mat-icon-button (click)="toggleExpanded()">
+        <mat-icon>{{expanded ? 'expand_less' : 'expand_more'}}</mat-icon>
+      </button>
+    </div>
   </mat-card-header>
   <mat-card-content>
-    <highcharts-chart [Highcharts]="Highcharts" [options]="chartOptions" [callbackFunction]="chartCallback" [(update)]="updateChart"></highcharts-chart>
+    <highcharts-chart [Highcharts]="Highcharts" [options]="chartOptions" [callbackFunction]="chartCallback"
+      [(update)]="updateChart" [class.expanded]="expanded"></highcharts-chart>
   </mat-card-content>
   <mat-card-actions>
     <div fxLayout="row wrap" *ngFor="let unit of units">

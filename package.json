@@ -24,6 +24,7 @@
     "@stomp/ng2-stompjs": "^7.2.0",
     "highcharts": "^7.2.0",
     "highcharts-angular": "^2.4.0",
+    "material-design-icons": "^3.0.1",
     "moment": "^2.24.0",
     "rxjs": "~6.5.2",
     "sockjs-client": "^1.4.0",
