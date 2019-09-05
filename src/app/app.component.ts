@@ -10,6 +10,8 @@ import { GasSensingUpdatesRange } from './gas-sensing-updates-range';
 export class AppComponent {
   gasSensingUpdatesRanges: GasSensingUpdatesRange[];
 
+  expanded: boolean;
+
   constructor(gasSensingUpdateService: GasSensingUpdateService) {
     gasSensingUpdateService.getRanges().subscribe(gasSensingUpdatesRanges => {
       this.gasSensingUpdatesRanges = gasSensingUpdatesRanges;

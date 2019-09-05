@@ -1,3 +1,12 @@
 #gas-chart-container {
   width: 100%;
+  padding: 16px 0 0 16px;
+}
+
+app-gas-chart {
+  height: calc(50vh - 8px);
+}
+
+app-gas-chart.full-height {
+  height: calc(100vh - 16px);
 }

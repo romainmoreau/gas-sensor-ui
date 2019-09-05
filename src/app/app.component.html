@@ -1,4 +1,8 @@
 <div id="gas-chart-container" fxLayout="row wrap" fxLayoutGap="16px grid">
-  <app-gas-chart *ngFor="let gasSensingUpdatesRange of gasSensingUpdatesRanges"
-    [gasSensingUpdatesRange]="gasSensingUpdatesRange"></app-gas-chart>
+  <app-gas-chart fxFlex.lt-md="100%" [fxFlex.md]="expanded ? '100%' : '50%'"
+    [fxFlex.lg]="expanded ? '100%' : 'calc(100% / 3)'" [fxFlex.gt-lg]="expanded ? '100%' : '25%'"
+    ngClass.lt-md="full-height" [class.full-height]="expanded"
+    *ngFor="let gasSensingUpdatesRange of gasSensingUpdatesRanges" [gasSensingUpdatesRange]="gasSensingUpdatesRange"
+    [(expanded)]="expanded">
+  </app-gas-chart>
 </div>

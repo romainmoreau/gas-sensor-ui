@@ -1,24 +1,28 @@
-<mat-card>
-  <mat-card-header fxLayout="row">
-    <mat-card-title>
-      <div>{{gasSensingUpdatesRange.description}} ({{gasSensingUpdatesRange.unit}})</div>
-    </mat-card-title>
-    <mat-card-subtitle>{{gasSensingUpdatesRange.sensorName}}</mat-card-subtitle>
-    <div fxFlex fxLayout="row" fxLayoutAlign="end" fxLayoutGap="8px">
-      <mat-spinner [fxShow]="isUpdating()" diameter="24"></mat-spinner>
-      <button mat-icon-button (click)="toggleExpanded()">
-        <mat-icon>{{expanded ? 'expand_less' : 'expand_more'}}</mat-icon>
-      </button>
-    </div>
-  </mat-card-header>
-  <mat-card-content>
-    <highcharts-chart [Highcharts]="Highcharts" [options]="chartOptions" [callbackFunction]="chartCallback"
-      [(update)]="updateChart" [class.expanded]="expanded"></highcharts-chart>
-  </mat-card-content>
-  <mat-card-actions>
-    <div fxLayout="row wrap" *ngFor="let unit of units">
-      <button mat-button [color]="unitName === unit.name && unitValue === value ? 'accent' : ''"
-        *ngFor="let value of unit.values" (click)="changeUnit(unit.name,value)">{{value}}{{unit.name}}</button>
-    </div>
-  </mat-card-actions>
-</mat-card>
+<div id="container" fxLayout="column">
+  <mat-card fxFlex fxLayout="column">
+    <mat-card-header fxLayout="row">
+      <mat-card-title>
+        <div>{{gasSensingUpdatesRange.description}} ({{gasSensingUpdatesRange.unit}})</div>
+      </mat-card-title>
+      <mat-card-subtitle>{{gasSensingUpdatesRange.sensorName}}</mat-card-subtitle>
+      <div fxFlex fxLayout="row" fxLayoutAlign="end" fxLayoutGap="8px">
+        <mat-spinner [fxShow]="isUpdating()" diameter="24"></mat-spinner>
+        <button mat-icon-button (click)="toggleExpanded()">
+          <mat-icon>{{expanded ? 'expand_less' : 'expand_more'}}</mat-icon>
+        </button>
+      </div>
+    </mat-card-header>
+    <mat-card-content fxFlex>
+      <div id="chart-container">
+        <highcharts-chart [Highcharts]="Highcharts" [options]="chartOptions" [callbackFunction]="chartCallback"
+          [(update)]="updateChart" [class.expanded]="expanded"></highcharts-chart>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <div fxLayout="row wrap" *ngFor="let unit of units">
+        <button mat-button [color]="unitName === unit.name && unitValue === value ? 'accent' : ''"
+          *ngFor="let value of unit.values" (click)="changeUnit(unit.name,value)">{{value}}{{unit.name}}</button>
+      </div>
+    </mat-card-actions>
+  </mat-card>
+</div>

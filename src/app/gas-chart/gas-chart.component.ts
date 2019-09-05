@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, Output, EventEmitter, SimpleChanges, AfterViewInit } from '@angular/core';
 import * as Highcharts from 'highcharts';
 import { GasSensingUpdatesRange } from '../gas-sensing-updates-range';
 import { GasSensingUpdateService } from '../gas-sensing-update.service';
@@ -14,7 +14,7 @@ import { GasSensingInterval } from '../gas-sensing-interval';
   templateUrl: './gas-chart.component.html',
   styleUrls: ['./gas-chart.component.scss']
 })
-export class GasChartComponent implements OnChanges {
+export class GasChartComponent implements OnChanges, AfterViewInit {
   Highcharts: typeof Highcharts = Highcharts;
   chartOptions: Highcharts.Options = {
     credits: {
@@ -48,7 +48,11 @@ export class GasChartComponent implements OnChanges {
   unitName: UnitName = 'm';
   unitValue = 15;
 
+  @Input()
   expanded: boolean;
+
+  @Output()
+  expandedChange = new EventEmitter<boolean>();
 
   chart: Highcharts.Chart;
   chartCallback: Highcharts.ChartCallbackFunction = (chart: Highcharts.Chart) => this.chart = chart;
@@ -67,15 +71,19 @@ export class GasChartComponent implements OnChanges {
     this.updateData();
   }
 
-  ngOnChanges(): void {
-    this.updateData();
-    this.rxStompService.watch(`/updates/${this.gasSensingUpdatesRange.sensorName}/${this.gasSensingUpdatesRange.description}/${this.gasSensingUpdatesRange.unit}`)
-      .subscribe(message => {
-        const gasSensingUpdate = JSON.parse(message.body) as GasSensingUpdate;
-        if (!this.isUpdating()) {
-          this.addGasSensingUpdates([gasSensingUpdate], true);
-        }
-      });
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.gasSensingUpdatesRange) {
+      this.updateData();
+      this.rxStompService.watch(`/updates/${this.gasSensingUpdatesRange.sensorName}/${this.gasSensingUpdatesRange.description}/${this.gasSensingUpdatesRange.unit}`)
+        .subscribe(message => {
+          const gasSensingUpdate = JSON.parse(message.body) as GasSensingUpdate;
+          if (!this.isUpdating()) {
+            this.addGasSensingUpdates([gasSensingUpdate], true);
+          }
+        });
+    } else if (changes.expanded) {
+      setTimeout(() => this.chart.reflow());
+    }
   }
 
   isUpdating(): boolean {
@@ -147,6 +155,10 @@ export class GasChartComponent implements OnChanges {
 
   toggleExpanded(): void {
     this.expanded = !this.expanded;
+    this.expandedChange.emit(this.expanded);
+  }
+
+  ngAfterViewInit() {
     setTimeout(() => this.chart.reflow());
   }
 }
