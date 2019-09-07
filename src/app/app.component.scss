@@ -8,10 +8,21 @@
 }
 
 app-gas-chart {
-  height: calc(50vh - 8px);
   scroll-snap-align: start;
 }
 
-app-gas-chart.full-height {
-  height: calc(100vh - 16px);
+@media screen and (max-height: 899px) {
+  app-gas-chart {
+    height: calc(100vh - 16px);
+  }
+}
+
+@media screen and (min-height: 900px) {
+  app-gas-chart {
+    height: calc(50vh - 8px);
+  }
+
+  app-gas-chart.expanded {
+    height: calc(100vh - 16px);
+  }
 }
