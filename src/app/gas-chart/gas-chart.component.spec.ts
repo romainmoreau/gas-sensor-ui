@@ -81,7 +81,7 @@ describe('GasChartComponent', () => {
     };
     fixture.detectChanges();
     expect(component.gasChartComponent).toBeTruthy();
-    expect(component.gasChartComponent.isUpdating()).toBeTruthy();
+    expect(component.gasChartComponent.isDataUpdating()).toBeTruthy();
     const updatesTestRequests = httpTestingController.match((httpRequest: HttpRequest<any>) => httpRequest.url.includes('/updates/'));
     expect(updatesTestRequests).toBeTruthy();
     expect(updatesTestRequests.length).toBe(1);
@@ -128,7 +128,7 @@ describe('GasChartComponent', () => {
       maxValue: 45.00000
     }]);
     fixture.detectChanges();
-    expect(component.gasChartComponent.isUpdating()).toBeFalsy();
+    expect(component.gasChartComponent.isDataUpdating()).toBeFalsy();
   });
 
   afterEach(() => {
