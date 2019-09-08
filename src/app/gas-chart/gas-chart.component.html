@@ -2,7 +2,7 @@
   <mat-card fxFlex fxLayout="column">
     <mat-card-header fxLayout="row">
       <mat-card-title>
-        <div>{{gasSensingUpdatesRange.description}} ({{gasSensingUpdatesRange.unit}})</div>
+        <div>{{chartOptions.series[0].name}}</div>
       </mat-card-title>
       <mat-card-subtitle>{{gasSensingUpdatesRange.sensorName}}</mat-card-subtitle>
       <div fxFlex fxLayout="row" fxLayoutAlign="end" fxLayoutGap="8px">
@@ -14,8 +14,8 @@
     </mat-card-header>
     <mat-card-content fxFlex>
       <div id="chart-container">
-        <highcharts-chart [Highcharts]="Highcharts" [options]="chartOptions" [callbackFunction]="chartCallback"
-          [(update)]="updateChart" [class.expanded]="expanded"></highcharts-chart>
+        <highcharts-chart [Highcharts]="Highcharts" constructorType="stockChart" [options]="chartOptions"
+          [callbackFunction]="chartCallback" [(update)]="updateChart" [class.expanded]="expanded"></highcharts-chart>
       </div>
     </mat-card-content>
     <mat-card-actions>

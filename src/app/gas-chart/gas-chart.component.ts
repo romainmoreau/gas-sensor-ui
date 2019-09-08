@@ -1,5 +1,5 @@
 import { Component, Input, OnChanges, Output, EventEmitter, SimpleChanges, AfterViewInit } from '@angular/core';
-import * as Highcharts from 'highcharts';
+import * as Highcharts from 'highcharts/highstock';
 import { GasSensingUpdatesRange } from '../gas-sensing-updates-range';
 import { GasSensingUpdateService } from '../gas-sensing-update.service';
 import { Unit, UnitName } from '../unit';
@@ -20,21 +20,26 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     credits: {
       enabled: false
     },
-    title: {
-      text: undefined
-    },
-    xAxis: {
-      type: 'datetime'
-    },
     time: {
       useUTC: false
     },
-    series: [
-      this.createSeriesOptions('GENERIC', '#0074D9'),
-      this.createSeriesOptions('FINE', '#2ECC40'),
-      this.createSeriesOptions('WARNING', '#FF851B'),
-      this.createSeriesOptions('SEVERE', '#FF4136')
-    ]
+    series: [{
+      type: 'line'
+    }],
+    plotOptions: {
+      series: {
+        zones: []
+      }
+    },
+    rangeSelector: {
+      enabled: false
+    },
+    navigator: {
+      enabled: false
+    },
+    scrollbar: {
+      enabled: false
+    }
   };
   updateChart: boolean;
   updateSubscription: Subscription;
@@ -73,6 +78,7 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.gasSensingUpdatesRange) {
+      this.updateName();
       this.updateData();
       this.rxStompService.watch(`/updates/${this.gasSensingUpdatesRange.sensorName}/${this.gasSensingUpdatesRange.description}/${this.gasSensingUpdatesRange.unit}`)
         .subscribe(message => {
@@ -90,6 +96,10 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     return this.updateSubscription && !this.updateSubscription.closed;
   }
 
+  private updateName(): void {
+    this.chartOptions.series[0].name = `${this.gasSensingUpdatesRange.description} (${this.gasSensingUpdatesRange.unit})`;
+  }
+
   private updateData(): void {
     if (this.isUpdating()) {
       this.updateSubscription.unsubscribe();
@@ -98,7 +108,17 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
       this.gasSensingUpdateService.getIntervals(this.gasSensingUpdatesRange),
       this.gasSensingUpdateService.getUpdates(this.gasSensingUpdatesRange, this.unitName, this.unitValue)
     ]).subscribe(([gasSensingIntervals, gasSensingUpdates]) => {
-      this.gasSensingIntervals = gasSensingIntervals;
+      this.gasSensingIntervals = gasSensingIntervals.sort((gasSensingInterval1, gasSensingInterval2) => {
+        if (gasSensingInterval1.maxValue === null && gasSensingInterval2.maxValue === null) {
+          return 0;
+        } else if (gasSensingInterval1.maxValue === null) {
+          return 1;
+        } else if (gasSensingInterval2.maxValue === null) {
+          return -1;
+        } else {
+          return gasSensingInterval1.maxValue - gasSensingInterval2.maxValue;
+        }
+      });
       this.addGasSensingUpdates(gasSensingUpdates, false);
     });
   }
@@ -108,21 +128,11 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
       moment(gasSensingUpdate.localDateTime, moment.HTML5_FMT.DATETIME_LOCAL_MS).valueOf(),
       gasSensingUpdate.value
     ] as [number, number]);
-    if (this.gasSensingIntervals.length === 0) {
-      this.addData(data, this.chartOptions.series[0] as Highcharts.SeriesScatterOptions, append);
-    } else {
-      this.gasSensingIntervals.forEach(gasSensingInterval => {
-        const filteredData = data.filter(d => (gasSensingInterval.minValue === null || gasSensingInterval.minValue >= d[1])
-          && (gasSensingInterval.maxValue === null || gasSensingInterval.maxValue < d[1]));
-        if (gasSensingInterval.category === 'FINE') {
-          this.addData(filteredData, this.chartOptions.series[1] as Highcharts.SeriesScatterOptions, append);
-        } else if (gasSensingInterval.category === 'WARNING') {
-          this.addData(filteredData, this.chartOptions.series[2] as Highcharts.SeriesScatterOptions, append);
-        } else if (gasSensingInterval.category === 'SEVERE') {
-          this.addData(filteredData, this.chartOptions.series[3] as Highcharts.SeriesScatterOptions, append);
-        }
-      });
-    }
+    this.chartOptions.plotOptions.series.zones = this.gasSensingIntervals.map(gasSensingInterval => ({
+      color: this.getColor(gasSensingInterval),
+      value: gasSensingInterval.maxValue
+    } as Highcharts.PlotSeriesZonesOptions));
+    this.addData(data, this.chartOptions.series[0] as Highcharts.SeriesLineOptions, append);
     if (append) {
       this.chart.redraw();
     } else {
@@ -130,27 +140,12 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  private addData(data: [number, number][], seriesOptions: Highcharts.SeriesScatterOptions, append: boolean) {
+  private addData(data: [number, number][], seriesOptions: Highcharts.SeriesLineOptions, append: boolean) {
     if (append) {
-      const series = this.chart.get(seriesOptions.id) as Highcharts.Series;
-      data.forEach(d => series.addPoint(d, false));
+      data.forEach(d => this.chart.series[0].addPoint(d, false));
     } else {
       seriesOptions.data = data;
     }
-  }
-
-  private createSeriesOptions(name: string, color: string): Highcharts.SeriesScatterOptions {
-    return {
-      id: name,
-      name,
-      color,
-      type: 'scatter',
-      tooltip: {
-        pointFormatter() {
-          return `${moment(this.x).format()}<br/>Value: ${this.y}`;
-        }
-      }
-    };
   }
 
   toggleExpanded(): void {
@@ -160,5 +155,14 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
 
   ngAfterViewInit() {
     setTimeout(() => this.chart.reflow());
+  }
+
+  private getColor(gasSensingInterval: GasSensingInterval): string {
+    switch (gasSensingInterval.category) {
+      case 'FINE': return '#2ECC40';
+      case 'WARNING': return '#FF851B';
+      case 'SEVERE': return '#FF4136';
+      default: return;
+    }
   }
 }
