@@ -135,8 +135,7 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     this.updateDataSubscription = this.gasSensingUpdateService.getUpdates(this.gasSensingUpdatesRange, this.unitName, this.unitValue)
       .subscribe(gasSensingUpdates => {
         const data = gasSensingUpdates.map(gasSensingUpdate => this.gasSensingUpdateToData(gasSensingUpdate));
-        (this.chartOptions.series[0] as Highcharts.SeriesLineOptions).data = data;
-        this.updateChart = true;
+        this.chart.series[0].setData(data);
       });
   }
 
