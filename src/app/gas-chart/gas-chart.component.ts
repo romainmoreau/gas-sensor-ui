@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, Output, EventEmitter, SimpleChanges, AfterViewInit } from '@angular/core';
+import { Component, Input, OnChanges, Output, EventEmitter, SimpleChanges, AfterViewInit, ElementRef } from '@angular/core';
 import * as Highcharts from 'highcharts/highstock';
 import { GasSensingUpdatesRange } from '../gas-sensing-updates-range';
 import { GasSensingUpdateService } from '../gas-sensing-update.service';
@@ -61,7 +61,9 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
   chart: Highcharts.Chart;
   chartCallback: Highcharts.ChartCallbackFunction = (chart: Highcharts.Chart) => this.chart = chart;
 
-  constructor(private gasSensingUpdateService: GasSensingUpdateService, private rxStompService: RxStompService) {
+  constructor(private elementRef: ElementRef,
+    private gasSensingUpdateService: GasSensingUpdateService,
+    private rxStompService: RxStompService) {
     this.units = [
       { name: 'm', values: [1, 5, 15, 30] },
       { name: 'h', values: [1, 2, 3, 6, 12] },
@@ -148,6 +150,7 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
 
   toggleExpanded(): void {
     this.expanded = !this.expanded;
+    setTimeout(() => this.elementRef.nativeElement.scrollIntoView());
     this.expandedChange.emit(this.expanded);
   }
 
