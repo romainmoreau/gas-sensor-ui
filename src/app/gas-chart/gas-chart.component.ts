@@ -1,5 +1,7 @@
 import { Component, Input, OnChanges, Output, EventEmitter, SimpleChanges, AfterViewInit, ElementRef } from '@angular/core';
 import * as Highcharts from 'highcharts/highstock';
+import theme from 'highcharts/themes/gray';
+theme(Highcharts);
 import { GasSensingUpdatesRange } from '../gas-sensing-updates-range';
 import { GasSensingUpdateService } from '../gas-sensing-update.service';
 import { Unit, UnitName } from '../unit';
