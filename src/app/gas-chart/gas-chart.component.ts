@@ -61,7 +61,8 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
   chart: Highcharts.Chart;
   chartCallback: Highcharts.ChartCallbackFunction = (chart: Highcharts.Chart) => this.chart = chart;
 
-  constructor(private elementRef: ElementRef,
+  constructor(
+    private elementRef: ElementRef,
     private gasSensingUpdateService: GasSensingUpdateService,
     private rxStompService: RxStompService) {
     this.units = [
