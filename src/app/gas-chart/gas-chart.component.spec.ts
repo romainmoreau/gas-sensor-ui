@@ -89,14 +89,14 @@ describe('GasChartComponent', () => {
     updatesTestRequest.flush([{
       id: 0,
       sensorName: 'SDS018',
-      localDateTime: '2019-08-31T21:34:32.847774',
+      localDateTime: '2019-08-31T21:34:31.847774',
       description: 'PM2.5',
       value: 4.20000,
       unit: 'ug/m3'
     }, {
       id: 1,
       sensorName: 'SDS018',
-      localDateTime: '2019-08-31T21:34:31.843854',
+      localDateTime: '2019-08-31T21:34:32.843854',
       description: 'PM2.5',
       value: 4.50000,
       unit: 'ug/m3'
