@@ -19,17 +19,22 @@ export class GasSensingUpdateService {
     return this.httpClient.get<GasSensingUpdatesRange[]>(`${this.urlPrefix}/ranges`);
   }
 
-  getUpdates(gasSensingUpdatesRange: GasSensingUpdatesRange, unitName: UnitName, unitValue: number): Observable<GasSensingUpdate[]> {
+  getUpdates(
+    sensorName: string,
+    description: string,
+    unit: string,
+    unitName: UnitName,
+    unitValue: number): Observable<GasSensingUpdate[]> {
     const beginning: string = moment().subtract(unitValue, unitName).format(moment.HTML5_FMT.DATETIME_LOCAL_MS);
     const end: string = moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS);
     return this.httpClient.get<GasSensingUpdate[]>(
-      `${this.urlPrefix}/updates/${gasSensingUpdatesRange.sensorName}/${gasSensingUpdatesRange.description}/${beginning}/${end}`,
-      { params: new HttpParams().set('unit', gasSensingUpdatesRange.unit) });
+      `${this.urlPrefix}/updates/${sensorName}/${description}/${beginning}/${end}`,
+      { params: new HttpParams().set('unit', unit) });
   }
 
-  getIntervals(gasSensingUpdatesRange: GasSensingUpdatesRange): Observable<GasSensingInterval[]> {
+  getIntervals(parameters: { description: string, unit: string }): Observable<GasSensingInterval[]> {
     return this.httpClient.get<GasSensingInterval[]>(
-      `${this.urlPrefix}/intervals/${gasSensingUpdatesRange.description}/`,
-      { params: new HttpParams().set('unit', gasSensingUpdatesRange.unit) });
+      `${this.urlPrefix}/intervals/${parameters.description}/`,
+      { params: new HttpParams().set('unit', parameters.unit) });
   }
 }

@@ -2,9 +2,8 @@
   <mat-card fxFlex fxLayout="column">
     <mat-card-header fxLayout="row">
       <mat-card-title>
-        <div>{{chartOptions.series[0].name}}</div>
+        <div>{{gasChartConfiguration.description}} ({{gasChartConfiguration.unit}})</div>
       </mat-card-title>
-      <mat-card-subtitle>{{gasSensingUpdatesRange.sensorName}}</mat-card-subtitle>
       <div fxFlex fxLayout="row" fxLayoutAlign="end" fxLayoutGap="8px">
         <mat-spinner [fxShow]="isDataUpdating()" diameter="24"></mat-spinner>
         <button mat-icon-button (click)="toggleExpanded()">

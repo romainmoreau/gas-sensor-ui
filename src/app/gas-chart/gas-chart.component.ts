@@ -2,14 +2,14 @@ import { Component, Input, OnChanges, Output, EventEmitter, SimpleChanges, After
 import * as Highcharts from 'highcharts/highstock';
 import theme from 'highcharts/themes/gray';
 theme(Highcharts);
-import { GasSensingUpdatesRange } from '../gas-sensing-updates-range';
 import { GasSensingUpdateService } from '../gas-sensing-update.service';
 import { Unit, UnitName } from '../unit';
 import * as moment from 'moment';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 import { RxStompService } from '@stomp/ng2-stompjs';
 import { GasSensingUpdate } from '../gas-sensing-update';
 import { GasSensingInterval } from '../gas-sensing-interval';
+import { GasChartConfiguration } from '../gas-chart-configuration';
 
 @Component({
   selector: 'app-gas-chart',
@@ -25,9 +25,6 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     time: {
       useUTC: false
     },
-    series: [{
-      type: 'line'
-    }],
     plotOptions: {
       series: {
         zones: []
@@ -48,7 +45,7 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
   updateDataSubscription: Subscription;
 
   @Input()
-  gasSensingUpdatesRange: GasSensingUpdatesRange;
+  gasChartConfiguration: GasChartConfiguration;
 
   units: Unit[];
   unitName: UnitName = 'm';
@@ -81,24 +78,37 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.gasSensingUpdatesRange) {
-      this.updateName();
-      this.updateIntervals();
-      this.updateData();
-      this.rxStompService.watch(`/updates/${this.gasSensingUpdatesRange.sensorName}/${this.gasSensingUpdatesRange.description}/${this.gasSensingUpdatesRange.unit}`)
-        .subscribe(message => {
-          const gasSensingUpdate = JSON.parse(message.body) as GasSensingUpdate;
-          if (!this.isDataUpdating()) {
-            this.chart.series[0].addPoint(this.gasSensingUpdateToData(gasSensingUpdate));
-          }
-        });
+    if (changes.gasChartConfiguration) {
+      setTimeout(() => {
+        this.updateSeries();
+        this.updateIntervals();
+        this.updateData();
+        this.rxStompService.watch(`/updates/${this.gasChartConfiguration.description}/${this.gasChartConfiguration.unit}`)
+          .subscribe(message => {
+            const gasSensingUpdate = JSON.parse(message.body) as GasSensingUpdate;
+            if (!this.isDataUpdating()) {
+              const series = this.chart.series.find(s => s.name === gasSensingUpdate.sensorName);
+              if (series) {
+                series.addPoint(this.gasSensingUpdateToData(gasSensingUpdate));
+              }
+            }
+          });
+      });
     } else if (changes.expanded) {
       setTimeout(() => this.chart.reflow());
     }
   }
 
-  private updateName(): void {
-    this.chartOptions.series[0].name = `${this.gasSensingUpdatesRange.description} (${this.gasSensingUpdatesRange.unit})`;
+  private updateSeries(): void {
+    while (this.chart.series.length > 0) {
+      this.chart.series[0].remove(false);
+    }
+    this.gasChartConfiguration.sensorNames.forEach(sensorName => {
+      this.chart.addSeries({
+        type: 'line',
+        name: sensorName
+      }, false);
+    });
   }
 
   private isIntervalsUpdating(): boolean {
@@ -109,7 +119,7 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     if (this.isIntervalsUpdating()) {
       this.updateIntervalsSubscription.unsubscribe();
     }
-    this.updateIntervalsSubscription = this.gasSensingUpdateService.getIntervals(this.gasSensingUpdatesRange)
+    this.updateIntervalsSubscription = this.gasSensingUpdateService.getIntervals(this.gasChartConfiguration)
       .subscribe(gasSensingIntervals => {
         this.chartOptions.plotOptions.series.zones = gasSensingIntervals.sort((gasSensingInterval1, gasSensingInterval2) => {
           if (gasSensingInterval1.maxValue === null && gasSensingInterval2.maxValue === null) {
@@ -137,10 +147,15 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     if (this.isDataUpdating()) {
       this.updateDataSubscription.unsubscribe();
     }
-    this.updateDataSubscription = this.gasSensingUpdateService.getUpdates(this.gasSensingUpdatesRange, this.unitName, this.unitValue)
-      .subscribe(gasSensingUpdates => {
-        const data = gasSensingUpdates.map(gasSensingUpdate => this.gasSensingUpdateToData(gasSensingUpdate));
-        this.chart.series[0].setData(data);
+    this.updateDataSubscription = forkJoin(this.gasChartConfiguration.sensorNames
+      .map(sensorName => this.gasSensingUpdateService.getUpdates(sensorName,
+        this.gasChartConfiguration.description, this.gasChartConfiguration.unit, this.unitName, this.unitValue)))
+      .subscribe(sensorNamesGasSensingUpdates => {
+        for (let i = 0; i < this.gasChartConfiguration.sensorNames.length; i++) {
+          const data = sensorNamesGasSensingUpdates[i].map(gasSensingUpdate => this.gasSensingUpdateToData(gasSensingUpdate));
+          this.chart.series[i].setData(data, false);
+        }
+        this.chart.redraw();
       });
   }
 
