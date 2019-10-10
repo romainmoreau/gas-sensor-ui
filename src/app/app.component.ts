@@ -33,4 +33,41 @@ export class AppComponent {
         } as GasChartConfiguration));
     });
   }
+
+  getRowCount(): number {
+    return window.matchMedia('(max-height: 899px)').matches ? 1 : 2;
+  }
+
+  getMdFlex(): string {
+    const rowCount = this.getRowCount();
+    if (this.expanded || this.gasChartConfigurations.length <= rowCount) {
+      return '100%';
+    } else {
+      return '50%';
+    }
+  }
+
+  getLgFlex(): string {
+    const rowCount = this.getRowCount();
+    if (this.expanded || this.gasChartConfigurations.length <= rowCount) {
+      return '100%';
+    } else if (this.gasChartConfigurations.length <= rowCount * 2) {
+      return '50%';
+    } else {
+      return 'calc(100% / 3)';
+    }
+  }
+
+  getGtLgFlex(): string {
+    const rowCount = this.getRowCount();
+    if (this.expanded || this.gasChartConfigurations.length <= rowCount) {
+      return '100%';
+    } else if (this.gasChartConfigurations.length <= rowCount * 2) {
+      return '50%';
+    } else if (this.gasChartConfigurations.length <= rowCount * 3) {
+      return 'calc(100% / 3)';
+    } else {
+      return '25%';
+    }
+  }
 }
