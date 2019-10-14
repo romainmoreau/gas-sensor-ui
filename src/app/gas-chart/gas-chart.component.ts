@@ -133,7 +133,7 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
           }
         }).map(gasSensingInterval => ({
           color: this.getColor(gasSensingInterval),
-          value: gasSensingInterval.maxValue
+          value: gasSensingInterval.maxValue !== null ? gasSensingInterval.maxValue : Number.MAX_VALUE
         } as Highcharts.PlotSeriesZonesOptions));
         this.updateChart = true;
       });
