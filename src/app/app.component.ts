@@ -25,7 +25,7 @@ export class AppComponent {
           groupedGasSensingUpdatesRanges[id] = [gasSensingUpdatesRange];
         }
       });
-      this.gasChartConfigurations = Object.values(groupedGasSensingUpdatesRanges)
+      this.gasChartConfigurations = Object.keys(groupedGasSensingUpdatesRanges).map(id => groupedGasSensingUpdatesRanges[id])
         .map(groupGasSensingUpdatesRanges => ({
           sensorNames: groupGasSensingUpdatesRanges.map(gasSensingUpdatesRange => gasSensingUpdatesRange.sensorName),
           description: groupGasSensingUpdatesRanges[0].description,
