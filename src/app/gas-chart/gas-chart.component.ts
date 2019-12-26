@@ -151,12 +151,42 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
       .map(sensorName => this.gasSensingUpdateService.getUpdates(sensorName,
         this.gasChartConfiguration.description, this.gasChartConfiguration.unit, this.unitName, this.unitValue)))
       .subscribe(sensorNamesGasSensingUpdates => {
+        const datas = this.normalizeDatas(this.sensorNamesGasSensingUpdatesToDatas(sensorNamesGasSensingUpdates));
         for (let i = 0; i < this.gasChartConfiguration.sensorNames.length; i++) {
-          const data = sensorNamesGasSensingUpdates[i].map(gasSensingUpdate => this.gasSensingUpdateToData(gasSensingUpdate));
-          this.chart.series[i].setData(data, false);
+          this.chart.series[i].setData(datas[i], false);
         }
         this.chart.redraw();
       });
+  }
+
+  private normalizeDatas(datas: [number, number][][]): [number, number][][] {
+    if (datas.length === 1) {
+      return datas;
+    }
+    const maxLength = Math.max(...datas.map(data => data.length));
+    if (maxLength === 0) {
+      return datas;
+    }
+    const normalizedDatas = datas.map(() => []);
+    const indexes = datas.map(() => 0);
+    while (!indexes.every((index, i) => index >= datas[i].length)) {
+      const iXMin = indexes.filter((index, i) => index < datas[i].length)
+        .map((index, i) => [i, datas[i][index][0]]).sort((a, b) => a[1] - b[1])[0];
+      normalizedDatas.forEach((normalizedData, i) => {
+        if (i === iXMin[0]) {
+          normalizedData.push(datas[i][indexes[i]]);
+        } else if (normalizedData.length !== 0) {
+          normalizedData.push([iXMin[1], normalizedData[normalizedData.length - 1][1]]);
+        }
+      });
+      indexes[iXMin[0]] = indexes[iXMin[0]] + 1;
+    }
+    return normalizedDatas;
+  }
+
+  private sensorNamesGasSensingUpdatesToDatas(sensorNamesGasSensingUpdates: GasSensingUpdate[][]): [number, number][][] {
+    return sensorNamesGasSensingUpdates.map(
+      gasSensingUpdates => gasSensingUpdates.map(gasSensingUpdate => this.gasSensingUpdateToData(gasSensingUpdate)));
   }
 
   private gasSensingUpdateToData(gasSensingUpdate: GasSensingUpdate): [number, number] {
