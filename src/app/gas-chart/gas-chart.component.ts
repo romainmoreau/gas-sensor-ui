@@ -89,7 +89,17 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
             if (!this.isDataUpdating()) {
               const series = this.chart.series.find(s => s.name === gasSensingUpdate.sensorName);
               if (series) {
-                series.addPoint(this.gasSensingUpdateService.gasSensingUpdateToData(gasSensingUpdate));
+                const point = this.gasSensingUpdateService.gasSensingUpdateToData(gasSensingUpdate);
+                const data = (series.options as Highcharts.SeriesLineOptions).data as [number, number][];
+                this.gasSensingUpdateService.addOrUpdatePoint(point, data, true);
+                series.setData(data, false);
+                const othersSeries = this.chart.series.filter(s => s.name !== gasSensingUpdate.sensorName);
+                othersSeries.forEach(otherSeries => {
+                  const otherData = (otherSeries.options as Highcharts.SeriesLineOptions).data as [number, number][];
+                  this.gasSensingUpdateService.addOrUpdatePoint(point, otherData, false);
+                  otherSeries.setData(otherData, false);
+                });
+                this.chart.redraw();
               }
             }
           });

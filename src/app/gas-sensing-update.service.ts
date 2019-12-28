@@ -32,6 +32,38 @@ export class GasSensingUpdateService {
       { params: new HttpParams().set('unit', unit) });
   }
 
+  addOrUpdatePoint(point: [number, number], data: [number, number][], realPoint: boolean): void {
+    let iExisting: number;
+    let iBefore: number;
+    for (let i = 0; i < data.length; i++) {
+      const pointAtI = data[data.length - i - 1];
+      const dx = pointAtI[0] - point[0];
+      if (dx === 0) {
+        iExisting = i;
+        break;
+      } else if (dx < 0) {
+        iBefore = i;
+        break;
+      }
+    }
+    if (iExisting !== undefined) {
+      if (realPoint) {
+        data[data.length - iExisting - 1] = point;
+      }
+    } else {
+      if (realPoint && iBefore === undefined) {
+        iBefore = data.length;
+      }
+      if (!realPoint) {
+        if (iBefore === undefined) {
+          return;
+        }
+        point = [point[0], data[data.length - iBefore - 1][1]];
+      }
+      data.splice(data.length - iBefore, 0, point);
+    }
+  }
+
   normalizeDatas(datas: [number, number][][]): [number, number][][] {
     if (datas.length === 1) {
       return datas;
