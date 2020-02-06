@@ -64,7 +64,7 @@ describe('GasChartComponent', () => {
   }));
 
   beforeEach(() => {
-    httpTestingController = TestBed.get(HttpTestingController);
+    httpTestingController = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(GasChartHostComponent);
     component = fixture.componentInstance;
   });
