@@ -20,7 +20,7 @@ import { GasChartConfiguration } from '../gas-chart-configuration';
   template: `<app-gas-chart [gasChartConfiguration]="gasChartConfiguration"></app-gas-chart>`
 })
 class GasChartHostComponent {
-  @ViewChild(GasChartComponent, { static: false })
+  @ViewChild(GasChartComponent)
   gasChartComponent: GasChartComponent;
 
   gasChartConfiguration: GasChartConfiguration;
