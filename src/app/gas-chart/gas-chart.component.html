@@ -14,7 +14,8 @@
     <mat-card-content fxFlex>
       <div id="chart-container">
         <highcharts-chart [Highcharts]="Highcharts" constructorType="stockChart" [options]="chartOptions"
-          [callbackFunction]="chartCallback" [(update)]="updateChart" [class.expanded]="expanded"></highcharts-chart>
+          (chartInstance)="updateChartInstance($event)" [(update)]="updateChart" [class.expanded]="expanded">
+        </highcharts-chart>
       </div>
     </mat-card-content>
     <mat-card-actions>

@@ -58,7 +58,6 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
   expandedChange = new EventEmitter<boolean>();
 
   chart: Highcharts.Chart;
-  chartCallback: Highcharts.ChartCallbackFunction = (chart: Highcharts.Chart) => this.chart = chart;
 
   constructor(
     private elementRef: ElementRef,
@@ -69,6 +68,10 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
       { name: 'h', values: [1, 2, 3, 6, 12] },
       { name: 'd', values: [1, 2, 3, 7, 14] }
     ];
+  }
+
+  updateChartInstance(chart: Highcharts.Chart) {
+    this.chart = chart;
   }
 
   changeUnit(unitName: UnitName, unitValue: number): void {
