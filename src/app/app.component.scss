@@ -1,10 +1,27 @@
+$padding: 16px;
+
+mat-toolbar {
+  position: absolute;
+  top: 0;
+  height: auto;
+  padding: $padding;
+  flex-wrap: wrap;
+}
+
+#toolbar-trigger {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: $padding;
+}
+
 #gas-chart-container {
   width: 100%;
   height: 100vh;
-  padding: 16px 0 0 16px;
+  padding: $padding 0 0 $padding;
   overflow-y: auto;
   scroll-snap-type: y mandatory;
-  scroll-padding: 16px;
+  scroll-padding: $padding;
 }
 
 app-gas-chart {
@@ -13,16 +30,16 @@ app-gas-chart {
 
 @media screen and (max-height: 899px) {
   app-gas-chart {
-    height: calc(100vh - 16px);
+    height: calc(100vh - #{$padding});
   }
 }
 
 @media screen and (min-height: 900px) {
   app-gas-chart {
-    height: calc(50vh - 8px);
+    height: calc(50vh - #{$padding / 2});
   }
 
   app-gas-chart.expanded {
-    height: calc(100vh - 16px);
+    height: calc(100vh - #{$padding});
   }
 }

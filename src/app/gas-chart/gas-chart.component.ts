@@ -47,9 +47,11 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
   @Input()
   gasChartConfiguration: GasChartConfiguration;
 
-  units: Unit[];
-  unitName: UnitName = 'm';
-  unitValue = 15;
+  @Input()
+  unitName: UnitName;
+
+  @Input()
+  unitValue: number;
 
   @Input()
   expanded: boolean;
@@ -63,21 +65,10 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     private elementRef: ElementRef,
     private gasSensingUpdateService: GasSensingUpdateService,
     private rxStompService: RxStompService) {
-    this.units = [
-      { name: 'm', values: [1, 5, 15, 30] },
-      { name: 'h', values: [1, 2, 3, 6, 12] },
-      { name: 'd', values: [1, 2, 3, 7, 14] }
-    ];
   }
 
   updateChartInstance(chart: Highcharts.Chart) {
     this.chart = chart;
-  }
-
-  changeUnit(unitName: UnitName, unitValue: number): void {
-    this.unitName = unitName;
-    this.unitValue = unitValue;
-    this.updateData();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -109,6 +100,8 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
       });
     } else if (changes.expanded) {
       setTimeout(() => this.chart.reflow());
+    } else if (changes.unitValue || changes.unitName) {
+      this.updateData();
     }
   }
 

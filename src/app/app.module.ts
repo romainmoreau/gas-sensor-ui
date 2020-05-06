@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { NgModule } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { AppComponent } from './app.component';
 import { GasChartComponent } from './gas-chart/gas-chart.component';
@@ -28,7 +29,8 @@ import { gasSensingRxStompConfig } from './gas-sensing-rx-stomp.config';
     MatCardModule,
     HighchartsChartModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
+    MatToolbarModule
   ],
   providers: [
     {

@@ -1,7 +1,14 @@
 <div id="gas-chart-container" fxLayout="row wrap" fxLayoutGap="16px grid">
-  <app-gas-chart fxFlex.lt-md="100%" [fxFlex.md]="getMdFlex()"
-    [fxFlex.lg]="getLgFlex()" [fxFlex.gt-lg]="getGtLgFlex()" [class.expanded]="expanded"
-    *ngFor="let gasChartConfiguration of gasChartConfigurations" [gasChartConfiguration]="gasChartConfiguration"
-    [(expanded)]="expanded">
+  <app-gas-chart fxFlex.lt-md="100%" [fxFlex.md]="getMdFlex()" [fxFlex.lg]="getLgFlex()" [fxFlex.gt-lg]="getGtLgFlex()"
+    [class.expanded]="expanded" *ngFor="let gasChartConfiguration of gasChartConfigurations"
+    [gasChartConfiguration]="gasChartConfiguration" [(expanded)]="expanded" [unitName]="unitName"
+    [unitValue]="unitValue">
   </app-gas-chart>
 </div>
+<div id="toolbar-trigger" (mouseenter)="toolbarVisible = true"></div>
+<mat-toolbar *ngIf="toolbarVisible" (mouseleave)="toolbarVisible = false">
+  <ng-container *ngFor="let unit of units">
+    <button mat-button [color]="unitName === unit.name && unitValue === value ? 'accent' : ''"
+      *ngFor="let value of unit.values" (click)="changeUnit(unit.name,value)">{{value}}{{unit.name}}</button>
+  </ng-container>
+</mat-toolbar>

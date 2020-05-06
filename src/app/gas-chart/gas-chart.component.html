@@ -18,11 +18,5 @@
         </highcharts-chart>
       </div>
     </mat-card-content>
-    <mat-card-actions>
-      <div fxLayout="row wrap" *ngFor="let unit of units">
-        <button mat-button [color]="unitName === unit.name && unitValue === value ? 'accent' : ''"
-          *ngFor="let value of unit.values" (click)="changeUnit(unit.name,value)">{{value}}{{unit.name}}</button>
-      </div>
-    </mat-card-actions>
   </mat-card>
 </div>
