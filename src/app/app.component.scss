@@ -1,19 +1,4 @@
-$padding: 16px;
-
-mat-toolbar {
-  position: absolute;
-  top: 0;
-  height: auto;
-  padding: $padding;
-  flex-wrap: wrap;
-}
-
-#toolbar-trigger {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  height: $padding;
-}
+@import "variables";
 
 #gas-chart-container {
   width: 100%;

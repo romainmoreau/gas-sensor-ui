@@ -3,8 +3,7 @@ import * as Highcharts from 'highcharts/highstock';
 import theme from 'highcharts/themes/gray';
 theme(Highcharts);
 import { GasSensingUpdateService } from '../gas-sensing-update.service';
-import { Unit, UnitName } from '../unit';
-import * as moment from 'moment';
+import { UnitValue } from '../unit';
 import { Subscription, forkJoin } from 'rxjs';
 import { RxStompService } from '@stomp/ng2-stompjs';
 import { GasSensingUpdate } from '../gas-sensing-update';
@@ -48,10 +47,7 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
   gasChartConfiguration: GasChartConfiguration;
 
   @Input()
-  unitName: UnitName;
-
-  @Input()
-  unitValue: number;
+  globalUnitValue: UnitValue;
 
   @Input()
   expanded: boolean;
@@ -61,10 +57,17 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
 
   chart: Highcharts.Chart;
 
+  unitValue: UnitValue;
+
   constructor(
     private elementRef: ElementRef,
     private gasSensingUpdateService: GasSensingUpdateService,
     private rxStompService: RxStompService) {
+  }
+
+  changeUnitValue(unitValue: UnitValue): void {
+    this.unitValue = unitValue;
+    this.updateData();
   }
 
   updateChartInstance(chart: Highcharts.Chart) {
@@ -100,7 +103,7 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
       });
     } else if (changes.expanded) {
       setTimeout(() => this.chart.reflow());
-    } else if (changes.unitValue || changes.unitName) {
+    } else if (changes.globalUnitValue && !this.unitValue) {
       this.updateData();
     }
   }
@@ -155,7 +158,8 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     }
     this.updateDataSubscription = forkJoin(this.gasChartConfiguration.sensorNames
       .map(sensorName => this.gasSensingUpdateService.getUpdates(sensorName,
-        this.gasChartConfiguration.description, this.gasChartConfiguration.unit, this.unitName, this.unitValue)))
+        this.gasChartConfiguration.description, this.gasChartConfiguration.unit,
+        this.unitValue ? this.unitValue : this.globalUnitValue)))
       .subscribe(sensorNamesGasSensingUpdates => {
         const datas = this.gasSensingUpdateService.normalizeDatas(
           this.gasSensingUpdateService.sensorNamesGasSensingUpdatesToDatas(sensorNamesGasSensingUpdates));

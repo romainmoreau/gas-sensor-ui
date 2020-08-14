@@ -5,7 +5,7 @@ import { GasSensingUpdatesRange } from './gas-sensing-updates-range';
 import * as moment from 'moment';
 import { GasSensingUpdate } from './gas-sensing-update';
 import { GasSensingInterval } from './gas-sensing-interval';
-import { UnitName } from './unit';
+import { UnitValue } from './unit';
 
 @Injectable({
   providedIn: 'root'
@@ -23,9 +23,8 @@ export class GasSensingUpdateService {
     sensorName: string,
     description: string,
     unit: string,
-    unitName: UnitName,
-    unitValue: number): Observable<GasSensingUpdate[]> {
-    const beginning: string = moment().subtract(unitValue, unitName).format(moment.HTML5_FMT.DATETIME_LOCAL_MS);
+    unitValue: UnitValue): Observable<GasSensingUpdate[]> {
+    const beginning: string = moment().subtract(unitValue.value, unitValue.name).format(moment.HTML5_FMT.DATETIME_LOCAL_MS);
     const end: string = moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS);
     return this.httpClient.get<GasSensingUpdate[]>(
       `${this.urlPrefix}/updates/${sensorName}/${description}/${beginning}/${end}`,

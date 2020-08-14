@@ -8,17 +8,18 @@ import { NgModule } from '@angular/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
-
 import { AppComponent } from './app.component';
 import { GasChartComponent } from './gas-chart/gas-chart.component';
 import { HighchartsChartModule } from 'highcharts-angular';
 import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
 import { gasSensingRxStompConfig } from './gas-sensing-rx-stomp.config';
+import { ToolbarComponent } from './toolbar/toolbar.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    GasChartComponent
+    GasChartComponent,
+    ToolbarComponent
   ],
   imports: [
     BrowserModule,

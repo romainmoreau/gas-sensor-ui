@@ -15,15 +15,19 @@ import { Observable, EMPTY } from 'rxjs';
 import { IMessage } from '@stomp/stompjs';
 import { MatIconModule } from '@angular/material/icon';
 import { GasChartConfiguration } from '../gas-chart-configuration';
+import { ToolbarComponent } from '../toolbar/toolbar.component';
+import { UnitValue } from '../unit';
 
 @Component({
-  template: `<app-gas-chart [gasChartConfiguration]="gasChartConfiguration"></app-gas-chart>`
+  template: `<app-gas-chart [gasChartConfiguration]="gasChartConfiguration" [globalUnitValue]="unitValue"></app-gas-chart>`
 })
 class GasChartHostComponent {
   @ViewChild(GasChartComponent)
   gasChartComponent: GasChartComponent;
 
   gasChartConfiguration: GasChartConfiguration;
+
+  unitValue: UnitValue;
 }
 
 @Injectable()
@@ -41,6 +45,7 @@ describe('GasChartComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [
+        ToolbarComponent,
         GasChartComponent,
         GasChartHostComponent
       ],
@@ -76,6 +81,7 @@ describe('GasChartComponent', () => {
       description: 'PM2.5',
       unit: 'ug/m3'
     };
+    component.unitValue = { name: 'm', value: 15 };
     fixture.detectChanges();
     fixture.whenStable().then(() => {
       expect(component.gasChartComponent).toBeTruthy();
