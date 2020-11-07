@@ -1,5 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { GasChartComponent } from './gas-chart.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -42,7 +41,7 @@ describe('GasChartComponent', () => {
   let fixture: ComponentFixture<GasChartHostComponent>;
   let component: GasChartHostComponent;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         ToolbarComponent,
@@ -74,7 +73,7 @@ describe('GasChartComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', async(() => {
+  it('should create', waitForAsync(() => {
     expect(component).toBeTruthy();
     component.gasChartConfiguration = {
       sensorNames: ['SDS018'],
