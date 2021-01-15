@@ -1,11 +1,14 @@
 <div id="toolbar-trigger" (mouseenter)="toolbarVisible = true"></div>
 <mat-toolbar *ngIf="toolbarVisible" (mouseleave)="toolbarVisible = false">
-  <ng-container *ngFor="let unit of units">
-    <button mat-button [color]="unitValue?.name === unit.name && unitValue?.value === value ? 'accent' : ''"
-      *ngFor="let value of unit.values"
-      (click)="changeUnitValue({name:unit.name,value:value})">{{value}}{{unit.name}}</button>
-  </ng-container>
-  <button *ngIf="addEmptyUnitValue" mat-button [color]="!unitValue ? 'accent' : ''" (click)="changeUnitValue()">
-    <mat-icon>close</mat-icon>
-  </button>
+  <div class="unit-values">
+    <ng-container *ngFor="let unit of units">
+      <button mat-button [color]="unitValue?.name === unit.name && unitValue?.value === value ? 'accent' : ''"
+        *ngFor="let value of unit.values"
+        (click)="changeUnitValue({name:unit.name,value:value})">{{value}}{{unit.name}}</button>
+    </ng-container>
+    <button *ngIf="addEmptyUnitValue" mat-button [color]="!unitValue ? 'accent' : ''" (click)="changeUnitValue()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <ng-content></ng-content>
 </mat-toolbar>

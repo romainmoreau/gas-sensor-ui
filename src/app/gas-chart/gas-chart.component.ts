@@ -9,6 +9,9 @@ import { RxStompService } from '@stomp/ng2-stompjs';
 import { GasSensingUpdate } from '../gas-sensing-update';
 import { GasSensingInterval } from '../gas-sensing-interval';
 import { GasChartConfiguration } from '../gas-chart-configuration';
+import { GasSensingAlertService } from '../gas-sensing-alert.service';
+import { GasSensingAlert } from '../gas-sensing-alert';
+import { relativeTimeRounding } from 'moment';
 
 @Component({
   selector: 'app-gas-chart',
@@ -42,6 +45,7 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
   updateChart: boolean;
   updateIntervalsSubscription: Subscription;
   updateDataSubscription: Subscription;
+  updateAlertsSubscription: Subscription;
 
   @Input()
   gasChartConfiguration: GasChartConfiguration;
@@ -59,9 +63,12 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
 
   unitValue: UnitValue;
 
+  gasSensingAlerts: GasSensingAlert[];
+
   constructor(
     private elementRef: ElementRef,
     private gasSensingUpdateService: GasSensingUpdateService,
+    private gasSensingAlertService: GasSensingAlertService,
     private rxStompService: RxStompService) {
   }
 
@@ -80,6 +87,7 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
         this.updateSeries();
         this.updateIntervals();
         this.updateData();
+        this.updateAlerts();
         this.rxStompService.watch(`/updates/${this.gasChartConfiguration.description}/${this.gasChartConfiguration.unit}`)
           .subscribe(message => {
             const gasSensingUpdate = JSON.parse(message.body) as GasSensingUpdate;
@@ -168,6 +176,47 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
         }
         this.chart.redraw();
       });
+  }
+
+  isAlertsUpdating(): boolean {
+    return this.updateAlertsSubscription && !this.updateAlertsSubscription.closed;
+  }
+
+  private updateAlerts(): void {
+    if (this.isAlertsUpdating()) {
+      this.updateAlertsSubscription.unsubscribe();
+    }
+    this.updateAlertsSubscription = forkJoin(this.gasChartConfiguration.sensorNames
+      .map(sensorName => this.gasSensingAlertService.getAlert(sensorName,
+        this.gasChartConfiguration.description, this.gasChartConfiguration.unit)))
+      .subscribe(gasSensingAlerts => {
+        this.gasSensingAlerts = gasSensingAlerts;
+      });
+  }
+
+  getAlertValue(index: number): string {
+    if (!this.gasSensingAlerts) {
+      return;
+    }
+    return this.gasSensingAlerts[index]?.thresholdCategory || 'FINE';
+  }
+
+  setAlertValue(index: number, value: string, sensorName: string): string {
+    if (!this.gasSensingAlerts) {
+      return;
+    }
+    const gasSensingAlert = this.gasSensingAlerts[index];
+    if (gasSensingAlert) {
+      this.gasSensingAlertService.deleteAlert(gasSensingAlert.id).subscribe(() => this.gasSensingAlerts[index] = null);
+    }
+    if (value !== 'FINE') {
+      this.gasSensingAlertService.postAlert({
+        description: this.gasChartConfiguration.description,
+        unit: this.gasChartConfiguration.unit,
+        sensorName: sensorName,
+        thresholdCategory: value,
+      }).subscribe(newGasSensingAlert => this.gasSensingAlerts[index] = newGasSensingAlert);
+    }
   }
 
   toggleExpanded(): void {

@@ -5,7 +5,13 @@ mat-toolbar {
   top: 0;
   height: auto;
   padding: $padding;
+}
+
+.unit-values {
+  display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
+  flex: 1;
 }
 
 #toolbar-trigger {

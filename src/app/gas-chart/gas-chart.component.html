@@ -19,5 +19,22 @@
       </div>
     </mat-card-content>
   </mat-card>
-  <app-toolbar [addEmptyUnitValue]="true" (unitValueChange)="changeUnitValue($event)"></app-toolbar>
+  <app-toolbar [addEmptyUnitValue]="true" (unitValueChange)="changeUnitValue($event)">
+    <div class="alerts">
+      <div class="alert" *ngFor="let sensorName of gasChartConfiguration.sensorNames; let index = index">
+        <span>{{sensorName}}</span>
+        <mat-button-toggle-group [value]="getAlertValue(index)" (change)="setAlertValue(index,$event.value,sensorName)">
+          <mat-button-toggle value="FINE">
+            <mat-icon class="fine-icon">check</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="WARNING">
+            <mat-icon class="warning-icon">warning</mat-icon>
+          </mat-button-toggle>
+          <mat-button-toggle value="SEVERE">
+            <mat-icon class="severe-icon">error</mat-icon>
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+    </div>
+  </app-toolbar>
 </div>

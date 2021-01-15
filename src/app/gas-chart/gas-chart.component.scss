@@ -28,3 +28,25 @@ mat-card-content {
 mat-card-title {
   margin-top: 8px;
 }
+
+.alerts {
+  display: flex;
+  flex-direction: column;
+}
+
+.alert {
+  display: flex;
+  flex-direction: column;
+}
+
+.fine-icon {
+  color: #2ecc40;
+}
+
+.warning-icon {
+  color: #ff851b;
+}
+
+.severe-icon {
+  color: #ff4136;
+}

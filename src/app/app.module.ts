@@ -14,6 +14,7 @@ import { HighchartsChartModule } from 'highcharts-angular';
 import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
 import { gasSensingRxStompConfig } from './gas-sensing-rx-stomp.config';
 import { ToolbarComponent } from './toolbar/toolbar.component';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { ToolbarComponent } from './toolbar/toolbar.component';
     HighchartsChartModule,
     MatProgressSpinnerModule,
     MatIconModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatButtonToggleModule,
   ],
   providers: [
     {
