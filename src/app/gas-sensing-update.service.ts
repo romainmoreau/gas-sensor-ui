@@ -102,7 +102,7 @@ export class GasSensingUpdateService {
     ];
   }
 
-  getIntervals(parameters: { description: string, unit: string }): Observable<GasSensingInterval[]> {
+  getIntervals(parameters: { description: string; unit: string }): Observable<GasSensingInterval[]> {
     return this.httpClient.get<GasSensingInterval[]>(
       `${this.urlPrefix}/intervals/${parameters.description}/`,
       { params: new HttpParams().set('unit', parameters.unit) });

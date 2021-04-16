@@ -13,7 +13,7 @@
     </mat-card-header>
     <mat-card-content fxFlex>
       <div id="chart-container">
-        <highcharts-chart [Highcharts]="Highcharts" constructorType="stockChart" [options]="chartOptions"
+        <highcharts-chart [Highcharts]="highcharts" constructorType="stockChart" [options]="chartOptions"
           (chartInstance)="updateChartInstance($event)" [(update)]="updateChart" [class.expanded]="expanded">
         </highcharts-chart>
       </div>

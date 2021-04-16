@@ -11,7 +11,6 @@ import { GasSensingInterval } from '../gas-sensing-interval';
 import { GasChartConfiguration } from '../gas-chart-configuration';
 import { GasSensingAlertService } from '../gas-sensing-alert.service';
 import { GasSensingAlert } from '../gas-sensing-alert';
-import { relativeTimeRounding } from 'moment';
 
 @Component({
   selector: 'app-gas-chart',
@@ -19,7 +18,21 @@ import { relativeTimeRounding } from 'moment';
   styleUrls: ['./gas-chart.component.scss']
 })
 export class GasChartComponent implements OnChanges, AfterViewInit {
-  Highcharts: typeof Highcharts = Highcharts;
+
+  @Input()
+  gasChartConfiguration: GasChartConfiguration;
+
+  @Input()
+  globalUnitValue: UnitValue;
+
+  @Input()
+  expanded: boolean;
+
+  @Output()
+  expandedChange = new EventEmitter<boolean>();
+
+  readonly highcharts: typeof Highcharts = Highcharts;
+
   chartOptions: Highcharts.Options = {
     credits: {
       enabled: false
@@ -46,18 +59,6 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
   updateIntervalsSubscription: Subscription;
   updateDataSubscription: Subscription;
   updateAlertsSubscription: Subscription;
-
-  @Input()
-  gasChartConfiguration: GasChartConfiguration;
-
-  @Input()
-  globalUnitValue: UnitValue;
-
-  @Input()
-  expanded: boolean;
-
-  @Output()
-  expandedChange = new EventEmitter<boolean>();
 
   chart: Highcharts.Chart;
 
@@ -116,6 +117,49 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     }
   }
 
+  isDataUpdating(): boolean {
+    return this.updateDataSubscription && !this.updateDataSubscription.closed;
+  }
+
+  isAlertsUpdating(): boolean {
+    return this.updateAlertsSubscription && !this.updateAlertsSubscription.closed;
+  }
+
+  getAlertValue(index: number): string {
+    if (!this.gasSensingAlerts) {
+      return;
+    }
+    return this.gasSensingAlerts[index]?.thresholdCategory || 'FINE';
+  }
+
+  setAlertValue(index: number, value: string, sensorName: string): string {
+    if (!this.gasSensingAlerts) {
+      return;
+    }
+    const gasSensingAlert = this.gasSensingAlerts[index];
+    if (gasSensingAlert) {
+      this.gasSensingAlertService.deleteAlert(gasSensingAlert.id).subscribe(() => this.gasSensingAlerts[index] = null);
+    }
+    if (value !== 'FINE') {
+      this.gasSensingAlertService.postAlert({
+        description: this.gasChartConfiguration.description,
+        unit: this.gasChartConfiguration.unit,
+        sensorName,
+        thresholdCategory: value,
+      }).subscribe(newGasSensingAlert => this.gasSensingAlerts[index] = newGasSensingAlert);
+    }
+  }
+
+  toggleExpanded(): void {
+    this.expanded = !this.expanded;
+    setTimeout(() => this.elementRef.nativeElement.scrollIntoView());
+    this.expandedChange.emit(this.expanded);
+  }
+
+  ngAfterViewInit() {
+    setTimeout(() => this.chart.reflow());
+  }
+
   private updateSeries(): void {
     while (this.chart.series.length > 0) {
       this.chart.series[0].remove(false);
@@ -156,10 +200,6 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
       });
   }
 
-  isDataUpdating(): boolean {
-    return this.updateDataSubscription && !this.updateDataSubscription.closed;
-  }
-
   private updateData(): void {
     if (this.isDataUpdating()) {
       this.updateDataSubscription.unsubscribe();
@@ -178,10 +218,6 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
       });
   }
 
-  isAlertsUpdating(): boolean {
-    return this.updateAlertsSubscription && !this.updateAlertsSubscription.closed;
-  }
-
   private updateAlerts(): void {
     if (this.isAlertsUpdating()) {
       this.updateAlertsSubscription.unsubscribe();
@@ -192,41 +228,6 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
       .subscribe(gasSensingAlerts => {
         this.gasSensingAlerts = gasSensingAlerts;
       });
-  }
-
-  getAlertValue(index: number): string {
-    if (!this.gasSensingAlerts) {
-      return;
-    }
-    return this.gasSensingAlerts[index]?.thresholdCategory || 'FINE';
-  }
-
-  setAlertValue(index: number, value: string, sensorName: string): string {
-    if (!this.gasSensingAlerts) {
-      return;
-    }
-    const gasSensingAlert = this.gasSensingAlerts[index];
-    if (gasSensingAlert) {
-      this.gasSensingAlertService.deleteAlert(gasSensingAlert.id).subscribe(() => this.gasSensingAlerts[index] = null);
-    }
-    if (value !== 'FINE') {
-      this.gasSensingAlertService.postAlert({
-        description: this.gasChartConfiguration.description,
-        unit: this.gasChartConfiguration.unit,
-        sensorName: sensorName,
-        thresholdCategory: value,
-      }).subscribe(newGasSensingAlert => this.gasSensingAlerts[index] = newGasSensingAlert);
-    }
-  }
-
-  toggleExpanded(): void {
-    this.expanded = !this.expanded;
-    setTimeout(() => this.elementRef.nativeElement.scrollIntoView());
-    this.expandedChange.emit(this.expanded);
-  }
-
-  ngAfterViewInit() {
-    setTimeout(() => this.chart.reflow());
   }
 
   private getColor(gasSensingInterval: GasSensingInterval): string {

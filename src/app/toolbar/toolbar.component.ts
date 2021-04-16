@@ -7,8 +7,6 @@ import { UnitValue, Unit } from '../unit';
   styleUrls: ['./toolbar.component.scss']
 })
 export class ToolbarComponent {
-  units: Unit[];
-
   @Input()
   unitValue: UnitValue;
 
@@ -17,6 +15,8 @@ export class ToolbarComponent {
 
   @Output()
   unitValueChange = new EventEmitter<UnitValue>();
+
+  units: Unit[];
 
   toolbarVisible: boolean;
 

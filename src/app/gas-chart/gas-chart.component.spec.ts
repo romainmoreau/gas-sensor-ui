@@ -16,6 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { GasChartConfiguration } from '../gas-chart-configuration';
 import { ToolbarComponent } from '../toolbar/toolbar.component';
 import { UnitValue } from '../unit';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @Component({
   template: `<app-gas-chart [gasChartConfiguration]="gasChartConfiguration" [globalUnitValue]="unitValue"></app-gas-chart>`
@@ -56,7 +57,8 @@ describe('GasChartComponent', () => {
         MatCardModule,
         HighchartsChartModule,
         MatProgressSpinnerModule,
-        MatIconModule
+        MatIconModule,
+        MatButtonToggleModule,
       ],
       providers: [
         {
@@ -130,6 +132,17 @@ describe('GasChartComponent', () => {
         minValue: null,
         maxValue: 45.00000
       }]);
+      const alertsTestRequests = httpTestingController.match((httpRequest: HttpRequest<any>) => httpRequest.url.includes('/alert/'));
+      expect(alertsTestRequests).toBeTruthy();
+      expect(alertsTestRequests.length).toBe(1);
+      const alertsTestRequest = alertsTestRequests[0];
+      alertsTestRequest.flush({
+        id: 0,
+        sensorName: 'SDS018',
+        description: 'PM2.5',
+        unit: 'ug/m3',
+        thresholdCategory: 'WARNING'
+      });
       fixture.detectChanges();
       expect(component.gasChartComponent.isDataUpdating()).toBeFalsy();
     });
