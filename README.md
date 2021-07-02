@@ -1,5 +1,5 @@
 # GasSensorUi
-[![Build Status](https://travis-ci.org/romainmoreau/gas-sensor-ui.svg?branch=master)](https://travis-ci.org/romainmoreau/gas-sensor-ui)
+[![Build Status](https://travis-ci.com/romainmoreau/gas-sensor-ui.svg?branch=master)](https://travis-ci.com/romainmoreau/gas-sensor-ui)
 
 ![Screenshot](/doc/screenshot.png)
 
