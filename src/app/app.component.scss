@@ -21,7 +21,7 @@ app-gas-chart {
 
 @media screen and (min-height: 900px) {
   app-gas-chart {
-    height: calc(50vh - #{$padding / 2});
+    height: calc(50vh - math.div($padding, 2));
   }
 
   app-gas-chart.expanded {
