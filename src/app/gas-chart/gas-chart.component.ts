@@ -11,6 +11,7 @@ import { GasSensingInterval } from '../gas-sensing-interval';
 import { GasChartConfiguration } from '../gas-chart-configuration';
 import { GasSensingAlertService } from '../gas-sensing-alert.service';
 import { GasSensingAlert } from '../gas-sensing-alert';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-gas-chart',
@@ -204,13 +205,16 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     if (this.isDataUpdating()) {
       this.updateDataSubscription.unsubscribe();
     }
+    const unitValue = this.unitValue ? this.unitValue : this.globalUnitValue;
+    const end: moment.Moment = moment();
+    const beginning: moment.Moment = moment().subtract(unitValue.value, unitValue.name);
     this.updateDataSubscription = forkJoin(this.gasChartConfiguration.sensorNames
       .map(sensorName => this.gasSensingUpdateService.getUpdates(sensorName,
-        this.gasChartConfiguration.description, this.gasChartConfiguration.unit,
-        this.unitValue ? this.unitValue : this.globalUnitValue)))
+        this.gasChartConfiguration.description, this.gasChartConfiguration.unit, beginning, end
+      )))
       .subscribe(sensorNamesGasSensingUpdates => {
         const datas = this.gasSensingUpdateService.normalizeDatas(
-          this.gasSensingUpdateService.sensorNamesGasSensingUpdatesToDatas(sensorNamesGasSensingUpdates));
+          this.gasSensingUpdateService.sensorNamesGasSensingUpdatesToDatas(sensorNamesGasSensingUpdates, beginning));
         for (let i = 0; i < this.gasChartConfiguration.sensorNames.length; i++) {
           this.chart.series[i].setData(datas[i], false);
         }

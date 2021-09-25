@@ -5,13 +5,15 @@ import { GasSensingUpdatesRange } from './gas-sensing-updates-range';
 import * as moment from 'moment';
 import { GasSensingUpdate } from './gas-sensing-update';
 import { GasSensingInterval } from './gas-sensing-interval';
-import { UnitValue } from './unit';
+import { GasSensingUpdates } from './gas-sensing-updates';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GasSensingUpdateService {
-  private urlPrefix = '/api';
+  private readonly momentFormat = moment.HTML5_FMT.DATETIME_LOCAL_MS;
+
+  private readonly urlPrefix = '/api';
 
   constructor(private httpClient: HttpClient) { }
 
@@ -23,11 +25,10 @@ export class GasSensingUpdateService {
     sensorName: string,
     description: string,
     unit: string,
-    unitValue: UnitValue): Observable<GasSensingUpdate[]> {
-    const beginning: string = moment().subtract(unitValue.value, unitValue.name).format(moment.HTML5_FMT.DATETIME_LOCAL_MS);
-    const end: string = moment().format(moment.HTML5_FMT.DATETIME_LOCAL_MS);
-    return this.httpClient.get<GasSensingUpdate[]>(
-      `${this.urlPrefix}/updates/${sensorName}/${description}/${beginning}/${end}`,
+    beginning: moment.Moment,
+    end: moment.Moment): Observable<GasSensingUpdates> {
+    return this.httpClient.get<GasSensingUpdates>(
+      `${this.urlPrefix}/updates/${sensorName}/${description}/${this.formatMoment(beginning)}/${this.formatMoment(end)}`,
       { params: new HttpParams().set('unit', unit) });
   }
 
@@ -90,14 +91,30 @@ export class GasSensingUpdateService {
     return normalizedDatas;
   }
 
-  sensorNamesGasSensingUpdatesToDatas(sensorNamesGasSensingUpdates: GasSensingUpdate[][]): [number, number][][] {
-    return sensorNamesGasSensingUpdates.map(
-      gasSensingUpdates => gasSensingUpdates.map(gasSensingUpdate => this.gasSensingUpdateToData(gasSensingUpdate)));
+  sensorNamesGasSensingUpdatesToDatas(sensorNamesGasSensingUpdates: GasSensingUpdates[], beginning: moment.Moment): [number, number][][] {
+    return sensorNamesGasSensingUpdates.map(gasSensingUpdates => {
+      if (gasSensingUpdates.periodUpdates.length === 0) {
+        if (gasSensingUpdates.firstOutOfPeriodUpdate) {
+          return [this.gasSensingUpdateToData(gasSensingUpdates.firstOutOfPeriodUpdate, beginning)];
+        } else {
+          return [];
+        }
+      } else {
+        const firstPeriodUpdate = gasSensingUpdates.periodUpdates[0];
+        const firstPeriodMoment = this.parseMoment(firstPeriodUpdate.localDateTime);
+        const periodDatas = gasSensingUpdates.periodUpdates.map(gasSensingUpdate => this.gasSensingUpdateToData(gasSensingUpdate));
+        if (firstPeriodMoment.isSame(beginning)) {
+          return periodDatas;
+        } else {
+          return [this.gasSensingUpdateToData(gasSensingUpdates.firstOutOfPeriodUpdate, beginning), ...periodDatas];
+        }
+      }
+    });
   }
 
-  gasSensingUpdateToData(gasSensingUpdate: GasSensingUpdate): [number, number] {
+  gasSensingUpdateToData(gasSensingUpdate: GasSensingUpdate, m?: moment.Moment): [number, number] {
     return [
-      moment(gasSensingUpdate.localDateTime, moment.HTML5_FMT.DATETIME_LOCAL_MS).valueOf(),
+      (m ?? this.parseMoment(gasSensingUpdate.localDateTime)).valueOf(),
       gasSensingUpdate.value
     ];
   }
@@ -106,5 +123,13 @@ export class GasSensingUpdateService {
     return this.httpClient.get<GasSensingInterval[]>(
       `${this.urlPrefix}/intervals/${parameters.description}/`,
       { params: new HttpParams().set('unit', parameters.unit) });
+  }
+
+  private parseMoment(s: string): moment.Moment {
+    return moment(s, this.momentFormat);
+  }
+
+  private formatMoment(m: moment.Moment) {
+    return m.format(this.momentFormat);
   }
 }
