@@ -103,7 +103,7 @@ export class GasSensingUpdateService {
         const firstPeriodUpdate = gasSensingUpdates.periodUpdates[0];
         const firstPeriodMoment = this.parseMoment(firstPeriodUpdate.localDateTime);
         const periodDatas = gasSensingUpdates.periodUpdates.map(gasSensingUpdate => this.gasSensingUpdateToData(gasSensingUpdate));
-        if (firstPeriodMoment.isSame(beginning)) {
+        if (firstPeriodMoment.isSame(beginning) || !gasSensingUpdates.firstOutOfPeriodUpdate) {
           return periodDatas;
         } else {
           return [this.gasSensingUpdateToData(gasSensingUpdates.firstOutOfPeriodUpdate, beginning), ...periodDatas];

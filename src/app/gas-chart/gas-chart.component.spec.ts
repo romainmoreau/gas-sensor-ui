@@ -91,21 +91,23 @@ describe('GasChartComponent', () => {
       expect(updatesTestRequests).toBeTruthy();
       expect(updatesTestRequests.length).toBe(1);
       const updatesTestRequest = updatesTestRequests[0];
-      updatesTestRequest.flush([{
-        id: 0,
-        sensorName: 'SDS018',
-        localDateTime: '2019-08-31T21:34:31.847774',
-        description: 'PM2.5',
-        value: 4.20000,
-        unit: 'ug/m3'
-      }, {
-        id: 1,
-        sensorName: 'SDS018',
-        localDateTime: '2019-08-31T21:34:32.843854',
-        description: 'PM2.5',
-        value: 4.50000,
-        unit: 'ug/m3'
-      }]);
+      updatesTestRequest.flush({
+        periodUpdates: [{
+          id: 0,
+          sensorName: 'SDS018',
+          localDateTime: '2019-08-31T21:34:31.847774',
+          description: 'PM2.5',
+          value: 4.20000,
+          unit: 'ug/m3'
+        }, {
+          id: 1,
+          sensorName: 'SDS018',
+          localDateTime: '2019-08-31T21:34:32.843854',
+          description: 'PM2.5',
+          value: 4.50000,
+          unit: 'ug/m3'
+        }]
+      });
       const intervalsTestRequests = httpTestingController.match((httpRequest: HttpRequest<any>) => httpRequest.url.includes('/intervals/'));
       expect(intervalsTestRequests).toBeTruthy();
       expect(intervalsTestRequests.length).toBe(1);
