@@ -54,6 +54,11 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
     },
     scrollbar: {
       enabled: false
+    },
+    chart: {
+      panning: {
+        enabled: false
+      }
     }
   };
   updateChart: boolean;
