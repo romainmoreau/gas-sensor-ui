@@ -1,29 +1,49 @@
-<div id="container" fxLayout="column">
-  <mat-card fxFlex fxLayout="column">
-    <mat-card-header fxLayout="row">
-      <mat-card-title>
-        <div>{{gasChartConfiguration.description}} ({{gasChartConfiguration.unit}})</div>
+<div class="container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title class="title">
+        {{ gasChartConfiguration.description }} ({{
+          gasChartConfiguration.unit
+        }})
       </mat-card-title>
-      <div fxFlex fxLayout="row" fxLayoutAlign="end" fxLayoutGap="8px">
-        <mat-spinner [fxShow]="isDataUpdating()" diameter="24"></mat-spinner>
+      <div class="panel">
+        <mat-spinner *ngIf="isDataUpdating()" diameter="24"></mat-spinner>
         <button mat-icon-button (click)="toggleExpanded()">
-          <mat-icon>{{expanded ? 'fullscreen_exit' : 'fullscreen'}}</mat-icon>
+          <mat-icon>{{ expanded ? "fullscreen_exit" : "fullscreen" }}</mat-icon>
         </button>
       </div>
     </mat-card-header>
-    <mat-card-content fxFlex>
-      <div id="chart-container">
-        <highcharts-chart [Highcharts]="highcharts" constructorType="stockChart" [options]="chartOptions"
-          (chartInstance)="updateChartInstance($event)" [(update)]="updateChart" [class.expanded]="expanded">
+    <mat-card-content>
+      <div class="chart-container">
+        <highcharts-chart
+          [Highcharts]="highcharts"
+          constructorType="stockChart"
+          [options]="chartOptions"
+          (chartInstance)="updateChartInstance($event)"
+          [(update)]="updateChart"
+          [class.expanded]="expanded"
+        >
         </highcharts-chart>
       </div>
     </mat-card-content>
   </mat-card>
-  <app-toolbar [addEmptyUnitValue]="true" (unitValueChange)="changeUnitValue($event)">
+  <app-toolbar
+    [addEmptyUnitValue]="true"
+    (unitValueChange)="changeUnitValue($event)"
+  >
     <div class="alerts">
-      <div class="alert" *ngFor="let sensorName of gasChartConfiguration.sensorNames; let index = index">
-        <span>{{sensorName}}</span>
-        <mat-button-toggle-group [value]="getAlertValue(index)" (change)="setAlertValue(index,$event.value,sensorName)">
+      <div
+        class="alert"
+        *ngFor="
+          let sensorName of gasChartConfiguration.sensorNames;
+          let index = index
+        "
+      >
+        <span>{{ sensorName }}</span>
+        <mat-button-toggle-group
+          [value]="getAlertValue(index)"
+          (change)="setAlertValue(index, $event.value, sensorName)"
+        >
           <mat-button-toggle value="FINE">
             <mat-icon class="fine-icon">check</mat-icon>
           </mat-button-toggle>

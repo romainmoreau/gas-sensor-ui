@@ -1,4 +1,4 @@
-import { GasSensingUpdate } from './gas-sensing-update';
+import { GasSensingUpdate } from "./gas-sensing-update";
 
 export interface GasSensingUpdates {
   periodUpdates: GasSensingUpdate[];

@@ -1,9 +1,9 @@
-import { InjectableRxStompConfig } from '@stomp/ng2-stompjs';
-import * as SockJS from 'sockjs-client';
+import { RxStompConfig } from "@stomp/rx-stomp";
+import * as SockJS from "sockjs-client";
 
-export const gasSensingRxStompConfig: InjectableRxStompConfig = {
-  webSocketFactory: () => new SockJS('/api/stompEndpoint'),
+export const gasSensingRxStompConfig: RxStompConfig = {
+  webSocketFactory: () => new SockJS("/api/stompEndpoint"),
   heartbeatIncoming: 0,
   heartbeatOutgoing: 20000,
-  reconnectDelay: 200
+  reconnectDelay: 200,
 };

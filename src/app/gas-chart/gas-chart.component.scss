@@ -1,6 +1,33 @@
-#container {
+.container {
   height: 100%;
   position: relative;
+  flex-direction: column;
+  box-sizing: border-box;
+  display: flex;
+}
+
+mat-card {
+  flex-direction: column;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 1e-9px;
+}
+
+mat-card-header {
+  flex-direction: row;
+  box-sizing: border-box;
+  display: flex;
+  padding-top: 0;
+  padding-right: 0;
+}
+
+.panel {
+  flex-direction: row;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 0%;
+  place-content: stretch flex-end;
+  align-items: stretch;
 }
 
 highcharts-chart {
@@ -10,14 +37,16 @@ highcharts-chart {
 }
 
 mat-spinner {
-  margin: 8px;
+  margin: auto 8px;
 }
 
 mat-card-content {
   position: relative;
+  flex: 1 1 1e-9px;
+  box-sizing: border-box;
 }
 
-#chart-container {
+.chart-container {
   position: absolute;
   left: 0;
   top: 0;

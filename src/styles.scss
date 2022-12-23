@@ -1,11 +1,20 @@
-@use '@angular/material' as mat;
-@import "~material-design-icons/iconfont/material-icons.css";
+@use "@angular/material" as mat;
+@import "@fontsource/material-icons";
 
 @include mat.core();
 
 $app-primary: mat.define-palette(mat.$light-blue-palette);
 $app-accent: mat.define-palette(mat.$light-green-palette);
-$app-theme: mat.define-dark-theme($app-primary, $app-accent);
+$app-typography: mat.define-typography-config();
+$app-theme: mat.define-dark-theme(
+  (
+    color: (
+      primary: $app-primary,
+      accent: $app-accent,
+    ),
+    typography: $app-typography,
+  )
+);
 
 @include mat.all-component-themes($app-theme);
 

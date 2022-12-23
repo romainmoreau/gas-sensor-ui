@@ -1,30 +1,30 @@
-import { Component, Output, EventEmitter, Input } from '@angular/core';
-import { UnitValue, Unit } from '../unit';
+import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { Unit, UnitValue } from "../unit";
 
 @Component({
-  selector: 'app-toolbar',
-  templateUrl: './toolbar.component.html',
-  styleUrls: ['./toolbar.component.scss']
+  selector: "app-toolbar",
+  templateUrl: "./toolbar.component.html",
+  styleUrls: ["./toolbar.component.scss"],
 })
 export class ToolbarComponent {
   @Input()
-  unitValue: UnitValue;
+  unitValue?: UnitValue;
 
   @Input()
-  addEmptyUnitValue: boolean;
+  addEmptyUnitValue!: boolean;
 
   @Output()
   unitValueChange = new EventEmitter<UnitValue>();
 
   units: Unit[];
 
-  toolbarVisible: boolean;
+  toolbarVisible?: boolean;
 
   constructor() {
     this.units = [
-      { name: 'm', values: [1, 5, 15, 30] },
-      { name: 'h', values: [1, 2, 3, 6, 12] },
-      { name: 'd', values: [1, 2, 3, 7, 14] }
+      { name: "m", values: [1, 5, 15, 30] },
+      { name: "h", values: [1, 2, 3, 6, 12] },
+      { name: "d", values: [1, 2, 3, 7, 14] },
     ];
   }
 

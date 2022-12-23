@@ -1,31 +1,25 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { HttpClientModule } from '@angular/common/http';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { NgModule } from '@angular/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { AppComponent } from './app.component';
-import { GasChartComponent } from './gas-chart/gas-chart.component';
-import { HighchartsChartModule } from 'highcharts-angular';
-import { InjectableRxStompConfig, RxStompService, rxStompServiceFactory } from '@stomp/ng2-stompjs';
-import { gasSensingRxStompConfig } from './gas-sensing-rx-stomp.config';
-import { ToolbarComponent } from './toolbar/toolbar.component';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { HttpClientModule } from "@angular/common/http";
+import { NgModule } from "@angular/core";
+import { MatButtonModule } from "@angular/material/button";
+import { MatButtonToggleModule } from "@angular/material/button-toggle";
+import { MatCardModule } from "@angular/material/card";
+import { MatIconModule } from "@angular/material/icon";
+import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
+import { MatToolbarModule } from "@angular/material/toolbar";
+import { BrowserModule } from "@angular/platform-browser";
+import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
+import { HighchartsChartModule } from "highcharts-angular";
+import { AppComponent } from "./app.component";
+import { GasChartComponent } from "./gas-chart/gas-chart.component";
+import { rxStompServiceFactory } from "./rx-stomp-service-factory";
+import { RxStompService } from "./rx-stomp.service";
+import { ToolbarComponent } from "./toolbar/toolbar.component";
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    GasChartComponent,
-    ToolbarComponent
-  ],
+  declarations: [AppComponent, GasChartComponent, ToolbarComponent],
   imports: [
     BrowserModule,
     HttpClientModule,
-    FlexLayoutModule,
     BrowserAnimationsModule,
     MatButtonModule,
     MatCardModule,
@@ -37,15 +31,10 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
   ],
   providers: [
     {
-      provide: InjectableRxStompConfig,
-      useValue: gasSensingRxStompConfig
-    },
-    {
       provide: RxStompService,
       useFactory: rxStompServiceFactory,
-      deps: [InjectableRxStompConfig]
-    }
+    },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

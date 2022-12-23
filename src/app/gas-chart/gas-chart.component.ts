@@ -1,33 +1,42 @@
-import { Component, Input, OnChanges, Output, EventEmitter, SimpleChanges, AfterViewInit, ElementRef } from '@angular/core';
-import * as Highcharts from 'highcharts/highstock';
-import theme from 'highcharts/themes/gray';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+} from "@angular/core";
+import * as Highcharts from "highcharts/highstock";
+import theme from "highcharts/themes/gray";
+import * as moment from "moment";
+import { forkJoin, Subscription } from "rxjs";
+import { GasChartConfiguration } from "../gas-chart-configuration";
+import { GasSensingAlert } from "../gas-sensing-alert";
+import { GasSensingAlertService } from "../gas-sensing-alert.service";
+import { GasSensingInterval } from "../gas-sensing-interval";
+import { GasSensingUpdate } from "../gas-sensing-update";
+import { GasSensingUpdateService } from "../gas-sensing-update.service";
+import { RxStompService } from "../rx-stomp.service";
+import { UnitValue } from "../unit";
+
 theme(Highcharts);
-import { GasSensingUpdateService } from '../gas-sensing-update.service';
-import { UnitValue } from '../unit';
-import { Subscription, forkJoin } from 'rxjs';
-import { RxStompService } from '@stomp/ng2-stompjs';
-import { GasSensingUpdate } from '../gas-sensing-update';
-import { GasSensingInterval } from '../gas-sensing-interval';
-import { GasChartConfiguration } from '../gas-chart-configuration';
-import { GasSensingAlertService } from '../gas-sensing-alert.service';
-import { GasSensingAlert } from '../gas-sensing-alert';
-import * as moment from 'moment';
 
 @Component({
-  selector: 'app-gas-chart',
-  templateUrl: './gas-chart.component.html',
-  styleUrls: ['./gas-chart.component.scss']
+  selector: "app-gas-chart",
+  templateUrl: "./gas-chart.component.html",
+  styleUrls: ["./gas-chart.component.scss"],
 })
 export class GasChartComponent implements OnChanges, AfterViewInit {
+  @Input()
+  gasChartConfiguration!: GasChartConfiguration;
 
   @Input()
-  gasChartConfiguration: GasChartConfiguration;
+  globalUnitValue!: UnitValue;
 
   @Input()
-  globalUnitValue: UnitValue;
-
-  @Input()
-  expanded: boolean;
+  expanded?: boolean;
 
   @Output()
   expandedChange = new EventEmitter<boolean>();
@@ -36,50 +45,53 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
 
   chartOptions: Highcharts.Options = {
     credits: {
-      enabled: false
+      enabled: false,
     },
     time: {
-      useUTC: false
+      useUTC: false,
     },
     plotOptions: {
       series: {
-        zones: []
-      }
+        zones: [],
+      },
     },
     rangeSelector: {
-      enabled: false
+      enabled: false,
     },
     navigator: {
-      enabled: false
+      enabled: false,
     },
     scrollbar: {
-      enabled: false
+      enabled: false,
     },
     chart: {
       panning: {
-        enabled: false
-      }
-    }
+        enabled: false,
+      },
+    },
+    accessibility: {
+      enabled: false,
+    },
   };
-  updateChart: boolean;
-  updateIntervalsSubscription: Subscription;
-  updateDataSubscription: Subscription;
-  updateAlertsSubscription: Subscription;
+  updateChart = false;
+  updateIntervalsSubscription?: Subscription;
+  updateDataSubscription?: Subscription;
+  updateAlertsSubscription?: Subscription;
 
-  chart: Highcharts.Chart;
+  chart?: Highcharts.Chart;
 
-  unitValue: UnitValue;
+  unitValue?: UnitValue;
 
-  gasSensingAlerts: GasSensingAlert[];
+  gasSensingAlerts?: (GasSensingAlert | null)[];
 
   constructor(
     private elementRef: ElementRef,
     private gasSensingUpdateService: GasSensingUpdateService,
     private gasSensingAlertService: GasSensingAlertService,
-    private rxStompService: RxStompService) {
-  }
+    private rxStompService: RxStompService
+  ) {}
 
-  changeUnitValue(unitValue: UnitValue): void {
+  changeUnitValue(unitValue?: UnitValue): void {
     this.unitValue = unitValue;
     this.updateData();
   }
@@ -89,70 +101,107 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.gasChartConfiguration) {
+    if (changes["gasChartConfiguration"]) {
       setTimeout(() => {
         this.updateSeries();
         this.updateIntervals();
         this.updateData();
         this.updateAlerts();
-        this.rxStompService.watch(`/updates/${this.gasChartConfiguration.description}/${this.gasChartConfiguration.unit}`)
-          .subscribe(message => {
-            const gasSensingUpdate = JSON.parse(message.body) as GasSensingUpdate;
+        this.rxStompService
+          .watch(
+            `/updates/${this.gasChartConfiguration.description}/${this.gasChartConfiguration.unit}`
+          )
+          .subscribe((message) => {
+            const gasSensingUpdate = JSON.parse(
+              message.body
+            ) as GasSensingUpdate;
             if (!this.isDataUpdating()) {
-              const series = this.chart.series.find(s => s.name === gasSensingUpdate.sensorName);
+              const series = this.chart?.series.find(
+                (s) => s.name === gasSensingUpdate.sensorName
+              );
               if (series) {
-                const point = this.gasSensingUpdateService.gasSensingUpdateToData(gasSensingUpdate);
-                const data = (series.options as Highcharts.SeriesLineOptions).data as [number, number][];
-                this.gasSensingUpdateService.addOrUpdatePoint(point, data, true);
+                const point =
+                  this.gasSensingUpdateService.gasSensingUpdateToData(
+                    gasSensingUpdate
+                  );
+                const data = (series.options as Highcharts.SeriesLineOptions)
+                  .data as [number, number][];
+                this.gasSensingUpdateService.addOrUpdatePoint(
+                  point,
+                  data,
+                  true
+                );
                 series.setData(data, false, false, false);
-                const othersSeries = this.chart.series.filter(s => s.name !== gasSensingUpdate.sensorName);
-                othersSeries.forEach(otherSeries => {
-                  const otherData = (otherSeries.options as Highcharts.SeriesLineOptions).data as [number, number][];
-                  this.gasSensingUpdateService.addOrUpdatePoint(point, otherData, false);
+                const othersSeries = this.chart?.series.filter(
+                  (s) => s.name !== gasSensingUpdate.sensorName
+                );
+                othersSeries?.forEach((otherSeries) => {
+                  const otherData = (
+                    otherSeries.options as Highcharts.SeriesLineOptions
+                  ).data as [number, number][];
+                  this.gasSensingUpdateService.addOrUpdatePoint(
+                    point,
+                    otherData,
+                    false
+                  );
                   otherSeries.setData(otherData, false, false, false);
                 });
-                this.chart.redraw();
+                this.chart?.redraw();
               }
             }
           });
       });
-    } else if (changes.expanded) {
-      setTimeout(() => this.chart.reflow());
-    } else if (changes.globalUnitValue && !this.unitValue) {
+    } else if (changes["expanded"]) {
+      setTimeout(() => this.chart?.reflow());
+    } else if (changes["globalUnitValue"] && !this.unitValue) {
       this.updateData();
     }
   }
 
   isDataUpdating(): boolean {
-    return this.updateDataSubscription && !this.updateDataSubscription.closed;
+    return !!this.updateDataSubscription && !this.updateDataSubscription.closed;
   }
 
   isAlertsUpdating(): boolean {
-    return this.updateAlertsSubscription && !this.updateAlertsSubscription.closed;
+    return (
+      !!this.updateAlertsSubscription && !this.updateAlertsSubscription.closed
+    );
   }
 
-  getAlertValue(index: number): string {
+  getAlertValue(index: number): string | undefined {
     if (!this.gasSensingAlerts) {
       return;
     }
-    return this.gasSensingAlerts[index]?.thresholdCategory || 'FINE';
+    return this.gasSensingAlerts[index]?.thresholdCategory || "FINE";
   }
 
-  setAlertValue(index: number, value: string, sensorName: string): string {
+  setAlertValue(index: number, value: string, sensorName: string): void {
     if (!this.gasSensingAlerts) {
       return;
     }
     const gasSensingAlert = this.gasSensingAlerts[index];
-    if (gasSensingAlert) {
-      this.gasSensingAlertService.deleteAlert(gasSensingAlert.id).subscribe(() => this.gasSensingAlerts[index] = null);
+    if (gasSensingAlert && gasSensingAlert.id) {
+      this.gasSensingAlertService
+        .deleteAlert(gasSensingAlert.id)
+        .subscribe(() => {
+          if (this.gasSensingAlerts) {
+            this.gasSensingAlerts[index] = null;
+          }
+        });
     }
-    if (value !== 'FINE') {
-      this.gasSensingAlertService.postAlert({
-        description: this.gasChartConfiguration.description,
-        unit: this.gasChartConfiguration.unit,
-        sensorName,
-        thresholdCategory: value,
-      }).subscribe(newGasSensingAlert => this.gasSensingAlerts[index] = newGasSensingAlert);
+    if (value !== "FINE") {
+      this.gasSensingAlertService
+        .postAlert({
+          description: this.gasChartConfiguration.description,
+          unit: this.gasChartConfiguration.unit,
+          sensorName,
+          thresholdCategory: value,
+        })
+        .subscribe((newGasSensingAlert) => {
+          if (this.gasSensingAlerts) {
+            this.gasSensingAlerts[index] = newGasSensingAlert;
+          }
+        });
     }
   }
 
@@ -163,88 +212,132 @@ export class GasChartComponent implements OnChanges, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    setTimeout(() => this.chart.reflow());
+    setTimeout(() => this.chart?.reflow());
   }
 
   private updateSeries(): void {
-    while (this.chart.series.length > 0) {
-      this.chart.series[0].remove(false);
+    while (this.chart?.series?.length ?? 0 > 0) {
+      this.chart?.series[0].remove(false);
     }
-    this.gasChartConfiguration.sensorNames.forEach(sensorName => {
-      this.chart.addSeries({
-        type: 'line',
-        name: sensorName
-      }, false);
+    this.gasChartConfiguration.sensorNames.forEach((sensorName) => {
+      this.chart?.addSeries(
+        {
+          type: "line",
+          name: sensorName,
+        },
+        false
+      );
     });
   }
 
   private isIntervalsUpdating(): boolean {
-    return this.updateIntervalsSubscription && !this.updateIntervalsSubscription.closed;
+    return (
+      !!this.updateIntervalsSubscription &&
+      !this.updateIntervalsSubscription.closed
+    );
   }
 
   private updateIntervals(): void {
     if (this.isIntervalsUpdating()) {
-      this.updateIntervalsSubscription.unsubscribe();
+      this.updateIntervalsSubscription?.unsubscribe();
     }
-    this.updateIntervalsSubscription = this.gasSensingUpdateService.getIntervals(this.gasChartConfiguration)
-      .subscribe(gasSensingIntervals => {
-        this.chartOptions.plotOptions.series.zones = gasSensingIntervals.sort((gasSensingInterval1, gasSensingInterval2) => {
-          if (gasSensingInterval1.maxValue === null && gasSensingInterval2.maxValue === null) {
-            return 0;
-          } else if (gasSensingInterval1.maxValue === null) {
-            return 1;
-          } else if (gasSensingInterval2.maxValue === null) {
-            return -1;
-          } else {
-            return gasSensingInterval1.maxValue - gasSensingInterval2.maxValue;
-          }
-        }).map(gasSensingInterval => ({
-          color: this.getColor(gasSensingInterval),
-          value: gasSensingInterval.maxValue !== null ? gasSensingInterval.maxValue : Number.MAX_VALUE
-        } as Highcharts.SeriesZonesOptionsObject));
-        this.updateChart = true;
+    this.updateIntervalsSubscription = this.gasSensingUpdateService
+      .getIntervals(this.gasChartConfiguration)
+      .subscribe((gasSensingIntervals) => {
+        if (this.chartOptions.plotOptions?.series) {
+          this.chartOptions.plotOptions.series.zones = gasSensingIntervals
+            .sort((gasSensingInterval1, gasSensingInterval2) => {
+              if (
+                gasSensingInterval1.maxValue === null &&
+                gasSensingInterval2.maxValue === null
+              ) {
+                return 0;
+              } else if (gasSensingInterval1.maxValue === null) {
+                return 1;
+              } else if (gasSensingInterval2.maxValue === null) {
+                return -1;
+              } else {
+                return (
+                  gasSensingInterval1.maxValue - gasSensingInterval2.maxValue
+                );
+              }
+            })
+            .map(
+              (gasSensingInterval) =>
+                ({
+                  color: this.getColor(gasSensingInterval),
+                  value:
+                    gasSensingInterval.maxValue !== null
+                      ? gasSensingInterval.maxValue
+                      : Number.MAX_VALUE,
+                } as Highcharts.SeriesZonesOptionsObject)
+            );
+          this.updateChart = true;
+        }
       });
   }
 
   private updateData(): void {
     if (this.isDataUpdating()) {
-      this.updateDataSubscription.unsubscribe();
+      this.updateDataSubscription?.unsubscribe();
     }
     const unitValue = this.unitValue ? this.unitValue : this.globalUnitValue;
     const end: moment.Moment = moment();
-    const beginning: moment.Moment = moment().subtract(unitValue.value, unitValue.name);
-    this.updateDataSubscription = forkJoin(this.gasChartConfiguration.sensorNames
-      .map(sensorName => this.gasSensingUpdateService.getUpdates(sensorName,
-        this.gasChartConfiguration.description, this.gasChartConfiguration.unit, beginning, end
-      )))
-      .subscribe(sensorNamesGasSensingUpdates => {
-        const datas = this.gasSensingUpdateService.normalizeDatas(
-          this.gasSensingUpdateService.sensorNamesGasSensingUpdatesToDatas(sensorNamesGasSensingUpdates, beginning));
-        for (let i = 0; i < this.gasChartConfiguration.sensorNames.length; i++) {
-          this.chart.series[i].setData(datas[i], false);
-        }
-        this.chart.redraw();
-      });
+    const beginning: moment.Moment = moment().subtract(
+      unitValue.value,
+      unitValue.name
+    );
+    this.updateDataSubscription = forkJoin(
+      this.gasChartConfiguration.sensorNames.map((sensorName) =>
+        this.gasSensingUpdateService.getUpdates(
+          sensorName,
+          this.gasChartConfiguration.description,
+          this.gasChartConfiguration.unit,
+          beginning,
+          end
+        )
+      )
+    ).subscribe((sensorNamesGasSensingUpdates) => {
+      const datas = this.gasSensingUpdateService.normalizeDatas(
+        this.gasSensingUpdateService.sensorNamesGasSensingUpdatesToDatas(
+          sensorNamesGasSensingUpdates,
+          beginning
+        )
+      );
+      for (let i = 0; i < this.gasChartConfiguration.sensorNames.length; i++) {
+        this.chart?.series[i].setData(datas[i], false);
+      }
+      this.chart?.redraw();
+    });
   }
 
   private updateAlerts(): void {
     if (this.isAlertsUpdating()) {
-      this.updateAlertsSubscription.unsubscribe();
+      this.updateAlertsSubscription?.unsubscribe();
     }
-    this.updateAlertsSubscription = forkJoin(this.gasChartConfiguration.sensorNames
-      .map(sensorName => this.gasSensingAlertService.getAlert(sensorName,
-        this.gasChartConfiguration.description, this.gasChartConfiguration.unit)))
-      .subscribe(gasSensingAlerts => {
-        this.gasSensingAlerts = gasSensingAlerts;
-      });
+    this.updateAlertsSubscription = forkJoin(
+      this.gasChartConfiguration.sensorNames.map((sensorName) =>
+        this.gasSensingAlertService.getAlert(
+          sensorName,
+          this.gasChartConfiguration.description,
+          this.gasChartConfiguration.unit
+        )
+      )
+    ).subscribe((gasSensingAlerts) => {
+      this.gasSensingAlerts = gasSensingAlerts;
+    });
   }
 
-  private getColor(gasSensingInterval: GasSensingInterval): string {
+  private getColor(gasSensingInterval: GasSensingInterval): string | undefined {
     switch (gasSensingInterval.category) {
-      case 'FINE': return '#2ECC40';
-      case 'WARNING': return '#FF851B';
-      case 'SEVERE': return '#FF4136';
-      default: return;
+      case "FINE":
+        return "#2ECC40";
+      case "WARNING":
+        return "#FF851B";
+      case "SEVERE":
+        return "#FF4136";
+      default:
+        return;
     }
   }
 }
