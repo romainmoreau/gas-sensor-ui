@@ -105,7 +105,7 @@ describe("GasChartComponent", () => {
             sensorName: "SDS018",
             localDateTime: "2019-08-31T21:34:31.847774",
             description: "PM2.5",
-            value: 4.2,
+            readValue: 4.2,
             unit: "ug/m3",
           },
           {
@@ -113,7 +113,7 @@ describe("GasChartComponent", () => {
             sensorName: "SDS018",
             localDateTime: "2019-08-31T21:34:32.843854",
             description: "PM2.5",
-            value: 4.5,
+            readValue: 4.5,
             unit: "ug/m3",
           },
         ],

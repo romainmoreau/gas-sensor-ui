@@ -3,6 +3,6 @@ export interface GasSensingUpdate {
   sensorName: string;
   localDateTime: string;
   description: string;
-  value: number;
+  readValue: number;
   unit: string;
 }

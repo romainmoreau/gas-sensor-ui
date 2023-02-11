@@ -161,7 +161,7 @@ export class GasSensingUpdateService {
   ): [number, number] {
     return [
       (m ?? this.parseMoment(gasSensingUpdate.localDateTime)).valueOf(),
-      gasSensingUpdate.value,
+      gasSensingUpdate.readValue,
     ];
   }
 
